@@ -669,102 +669,6 @@ Killing:AddSwitch("Kill [No Bring]", function(bool)
 	end
 end)
 
-local isEnabled = false
-local characterAddedConnection = nil
-local savedCFrame = nil
-local Players = Services.Players
-local LocalPlayer = PlayerData.Player
-
-_G.blacklistedPlayers = _G.blacklistedPlayers or {}
-
-local function isBlacklisted(player)
-	if not player then return false end
-	return table.find(_G.blacklistedPlayers, player.Name) ~= nil
-end
-
-local function isAlive(player)
-	if not player or not player.Character then return false end
-	local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-	local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-	return humanoid and rootPart and humanoid.Health > 0
-end
-
-local function getCharacter()
-	return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-end
-
-local function getRoot(character)
-	return character and character:FindFirstChild("HumanoidRootPart")
-end
-
-local function getTargets()
-	local targets = {}
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and isBlacklisted(player) and isAlive(player) then
-			table.insert(targets, player)
-		end
-	end
-	return targets
-end
-
-local function performKill()
-	local character = getCharacter()
-	local myRoot = getRoot(character)
-	if not myRoot then return end
-	for _, target in ipairs(getTargets()) do
-		local targetRoot = getRoot(target.Character)
-		if targetRoot then
-			savedCFrame = myRoot.CFrame
-			pcall(function()
-				myRoot.CFrame = targetRoot.CFrame
-				killPlayer(target)
-			end)
-			task.wait(0.05)
-			if savedCFrame then
-				myRoot.CFrame = savedCFrame
-			end
-			savedCFrame = nil
-		end
-	end
-end
-
-local function startKillTeleport()
-	if isEnabled then return end
-	isEnabled = true
-	if characterAddedConnection then
-		characterAddedConnection:Disconnect()
-	end
-	characterAddedConnection = LocalPlayer.CharacterAdded:Connect(function()
-		if isEnabled then
-			task.wait(0.15)
-			performKill()
-		end
-	end)
-	task.spawn(function()
-		while isEnabled do
-			performKill()
-			task.wait(0.2)
-		end
-	end)
-end
-
-local function stopKillTeleport()
-	isEnabled = false
-	savedCFrame = nil
-	if characterAddedConnection then
-		characterAddedConnection:Disconnect()
-		characterAddedConnection = nil
-	end
-end
-
-Killing:AddSwitch("Kill [Teleport] {Size 2} (Choose ONE Player)", function(enabled)
-	if enabled then
-		startKillTeleport()
-	else
-		stopKillTeleport()
-	end
-end):Set(false)
-
 local SpectateData = {
 	SelectedPlayer = nil,
 	SelectedPlayerUserId = nil,
@@ -1557,6 +1461,92 @@ Godmode:AddSwitch("Spawn With Pack HP", function(b)
         end)
     end
 end):Set(false)
+
+local on, kills, target, charConn = false, 0, nil, nil
+local savedCF = nil
+
+local function getKills()
+    return getLeaderstatsKills()
+end
+
+local function alive(p)
+    if not p or not p.Character then return false end
+    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+    local hum = p.Character:FindFirstChildOfClass("Humanoid")
+    return hrp and hum and hum.Health > 0
+end
+
+local function doKill()
+    if not target or not alive(target) then return end
+    local char  = Player.Character
+    local myHRP = char and char:FindFirstChild("HumanoidRootPart")
+    local tHRP  = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+    if not myHRP or not tHRP then return end
+
+    savedCF      = myHRP.CFrame
+    myHRP.CFrame = tHRP.CFrame
+
+    killPlayer(target)
+
+    task.wait(0.1)
+
+    myHRP.CFrame = savedCF
+    savedCF = nil
+end
+
+local function start()
+    if on then return end
+    on    = true
+    kills = getKills()
+    charConn = Player.CharacterAdded:Connect(function(c)
+        if on then
+            task.wait(0.5)
+            doKill()
+        end
+    end)
+    task.spawn(function()
+        while on do
+            doKill()
+            task.wait(0.1)
+        end
+    end)
+end
+
+local function stop()
+    on      = false
+    savedCF = nil
+    if charConn then charConn:Disconnect(); charConn = nil end
+end
+
+local drop = Tabs.GodMode:AddDropdown("Select Target", function(txt)
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.DisplayName .. " | " .. p.Name == txt then
+            target = p
+            break
+        end
+    end
+end)
+
+for _, p in ipairs(Players:GetPlayers()) do
+    if p ~= Player then
+        drop:Add(p.DisplayName .. " | " .. p.Name)
+    end
+end
+
+Players.PlayerAdded:Connect(function(p)
+    if p ~= Player then
+        drop:Add(p.DisplayName .. " | " .. p.Name)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+    if target == p then target = nil end
+end)
+
+local sw = Godmode:AddSwitch("Kill (Teleport)", function(v)
+    if v then start() else stop() end
+end)
+sw:Set(true)
 
 local GymLocations = {
 	{name = "Tiny Island", pos = CFrame.new(-37.1, 9.2, 1919)},
