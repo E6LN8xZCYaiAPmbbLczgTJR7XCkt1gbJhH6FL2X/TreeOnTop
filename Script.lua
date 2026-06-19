@@ -1518,7 +1518,7 @@ local function stop()
     if charConn then charConn:Disconnect(); charConn = nil end
 end
 
-local drop = Tabs.GodMode:AddDropdown("Select Target", function(txt)
+local drop = Godmode:AddDropdown("Select Target", function(txt)
     for _, p in ipairs(Players:GetPlayers()) do
         if p.DisplayName .. " | " .. p.Name == txt then
             target = p
