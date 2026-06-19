@@ -1,10 +1,7 @@
 local Services = {
 	Players = game:GetService("Players"),
 	ReplicatedStorage = game:GetService("ReplicatedStorage"),
-	VirtualUser = game:GetService("VirtualUser"),
 	Workspace = workspace,
-	Lighting = game:GetService("Lighting"),
-	UserInputService = game:GetService("UserInputService"),
 	RunService = game:GetService("RunService")
 }
 
@@ -29,7 +26,6 @@ local player = players.LocalPlayer
 PlayerData.Humanoid = PlayerData.Character and PlayerData.Character:FindFirstChildOfClass("Humanoid")
 
 local Remotes = {
-	ChangeSpeedSize = Services.ReplicatedStorage.rEvents.changeSpeedSizeRemote,
 	MuscleEvent = PlayerData.Player.muscleEvent
 }
 
@@ -64,12 +60,11 @@ local window = library:AddWindow("TREE | Private Killing |" .. Utils.greeting(),
 	min_size = Vector2.new(500, 750)
 })
 
-Main = window:AddTab("     Main     ")
+Main = window:AddTab("          Main          ")
 Main:Show()
-Killing = window:AddTab("     Killing     ")
-Stats = window:AddTab("     Stats     ")
-Godmode = window:AddTab("     Godmode     ")
-Inventory = window:AddTab("     Inventory     ")
+Killing = window:AddTab("          Killing          ")
+Stats = window:AddTab("          Stats          ")
+Godmode = window:AddTab("          Godmode          ")
 
 local cr = Main:AddLabel("Credits: Tree")
 cr.TextSize = 50
@@ -135,6 +130,15 @@ PlayerData.Player.CharacterAdded:Connect(function(newChar)
 	if Protection.AntiFling.Enabled then eAntiFling() end
 end)
 
+local HideFrames = Main:AddSwitch("Hide Frames", function(bool)
+    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
+        if obj.Name:match("Frame$") then
+            obj.Visible = not bool
+        end
+    end
+end)
+HideFrames:Set(true)
+
 local WaterParts = {
 	Parts = {},
 	PartSize = 2048,
@@ -171,6 +175,20 @@ local WalkonWater = Main:AddSwitch("Walk on Water", function(bool)
 	end
 end)
 WalkonWater:Set(false)
+
+local ShowPets = Main:AddSwitch("Show Pets", function(bool)
+	if PlayerData.Player:FindFirstChild("hidePets") then
+		PlayerData.Player.hidePets.Value = bool
+	end
+end)
+ShowPets:Set(false)
+
+local ShowOtherPets = Main:AddSwitch("Show Other Pets", function(bool)
+	if PlayerData.Player:FindFirstChild("showOtherPetsOn") then
+		PlayerData.Player.showOtherPetsOn.Value = bool
+	end
+end)
+ShowOtherPets:Set(false)
 
 local function checkCharacter()
 	if not Services.Players.LocalPlayer.Character then
@@ -392,6 +410,38 @@ Killing:AddSwitch("Remove Attack Animations", function(bool)
 				end
 			end
 			_G.ToolConnections = nil
+		end
+	end
+end)
+
+Killing:AddSwitch("Fast Punch", function(state)
+	_G.fastHitActive = state
+	if state then
+		task.spawn(function()
+			while _G.fastHitActive do
+				local punch = LocalPlayer.Backpack:FindFirstChild("Punch")
+				if punch then
+					punch.Parent = LocalPlayer.Character
+					if punch:FindFirstChild("attackTime") then
+						punch.attackTime.Value = 0
+					end
+				end
+				task.wait(0.1)
+			end
+		end)
+		task.spawn(function()
+			while _G.fastHitActive do
+				local punch = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Punch")
+				if punch then
+					punch:Activate()
+				end
+				task.wait(0.1)
+			end
+		end)
+	else
+		local punch = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Punch")
+		if punch then
+			punch.Parent = LocalPlayer.Backpack
 		end
 	end
 end)
@@ -1462,92 +1512,6 @@ Godmode:AddSwitch("Spawn With Pack HP", function(b)
     end
 end):Set(false)
 
-local on, kills, target, charConn = false, 0, nil, nil
-local savedCF = nil
-
-local function getKills()
-    return getLeaderstatsKills()
-end
-
-local function alive(p)
-    if not p or not p.Character then return false end
-    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-    return hrp and hum and hum.Health > 0
-end
-
-local function doKill()
-    if not target or not alive(target) then return end
-    local char  = Player.Character
-    local myHRP = char and char:FindFirstChild("HumanoidRootPart")
-    local tHRP  = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
-    if not myHRP or not tHRP then return end
-
-    savedCF      = myHRP.CFrame
-    myHRP.CFrame = tHRP.CFrame
-
-    killPlayer(target)
-
-    task.wait(0.1)
-
-    myHRP.CFrame = savedCF
-    savedCF = nil
-end
-
-local function start()
-    if on then return end
-    on    = true
-    kills = getKills()
-    charConn = Player.CharacterAdded:Connect(function(c)
-        if on then
-            task.wait(0.5)
-            doKill()
-        end
-    end)
-    task.spawn(function()
-        while on do
-            doKill()
-            task.wait(0.1)
-        end
-    end)
-end
-
-local function stop()
-    on      = false
-    savedCF = nil
-    if charConn then charConn:Disconnect(); charConn = nil end
-end
-
-local drop = Godmode:AddDropdown("Select Target", function(txt)
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p.DisplayName .. " | " .. p.Name == txt then
-            target = p
-            break
-        end
-    end
-end)
-
-for _, p in ipairs(Players:GetPlayers()) do
-    if p ~= Player then
-        drop:Add(p.DisplayName .. " | " .. p.Name)
-    end
-end
-
-Players.PlayerAdded:Connect(function(p)
-    if p ~= Player then
-        drop:Add(p.DisplayName .. " | " .. p.Name)
-    end
-end)
-
-Players.PlayerRemoving:Connect(function(p)
-    if target == p then target = nil end
-end)
-
-local sw = Godmode:AddSwitch("Kill (Teleport)", function(v)
-    if v then start() else stop() end
-end)
-sw:Set(true)
-
 local GymLocations = {
 	{name = "Tiny Island", pos = CFrame.new(-37.1, 9.2, 1919)},
 	{name = "Main Island", pos = CFrame.new(16.07, 9.08, 133.8)},
@@ -1602,7 +1566,7 @@ if localPlayer.Character then
     onCharacterAdded(localPlayer.Character)
 end
 
-Godmode:AddSwitch("Auto TP to Water", function(enabled)
+Godmode:AddSwitch("Auto Teleport to Water", function(enabled)
     autoTeleportEnabled = enabled
 end)
 
@@ -1640,102 +1604,90 @@ Godmode:AddSwitch("Brawl Mode", function(state)
     end
 end)
 
-local isBrawlEnabled = false
-local isFollowing = false
-local currentTargetName = nil
-local playerLookup = {}
+local FollowSystem = {
+    Enabled = false,
+    Target = nil,
+    PlayerMap = {}
+}
 
-local function formatPlayerLabel(player)
+local function getRoot(character)
+    return character and character:FindFirstChild("HumanoidRootPart")
+end
+
+local function formatLabel(player)
     return string.format("%s | %s", player.DisplayName, player.Name)
 end
 
-local function updatePlayerLookup()
-    table.clear(playerLookup)
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            playerLookup[formatPlayerLabel(player)] = player
-        end
-    end
+function FollowSystem:SnapToTarget()
+    if not self.Enabled or not self.Target then return end
+    local targetChar = self.Target.Character
+    local myChar = LocalPlayer.Character
+    local targetRoot = getRoot(targetChar)
+    local myRoot = getRoot(myChar)
+    if not (targetRoot and myRoot) then return end
+    local offset = -targetRoot.CFrame.LookVector * 3
+    local position = targetRoot.Position + offset
+    myRoot.CFrame = CFrame.new(position, targetRoot.Position)
 end
 
-local function moveBehindTarget(targetPlayer)
-    local myCharacter = LocalPlayer.Character
-    local targetCharacter = targetPlayer.Character
-    if not (myCharacter and targetCharacter) then return end
-    local myRoot = myCharacter:FindFirstChild("HumanoidRootPart")
-    local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
-    if myRoot and targetRoot then
-        local behindPosition = targetRoot.Position - (targetRoot.CFrame.LookVector * 3)
-        myRoot.CFrame = CFrame.new(behindPosition, targetRoot.Position)
-    end
-end
-
-local sele = Godmode:AddDropdown("Select Player", function(selectedLabel)
-    local selectedPlayer = playerLookup[selectedLabel]
-    if selectedPlayer then
-        currentTargetName = selectedPlayer.Name
-        isFollowing = true
-        print(".:", selectedPlayer.Name)
-        moveBehindTarget(selectedPlayer)
-    end
-end)
-
-updatePlayerLookup()
-for label in pairs(playerLookup) do
+function FollowSystem:AddPlayer(player, sele)
+    if player == LocalPlayer then return end
+    local label = formatLabel(player)
+    self.PlayerMap[label] = player
     sele:Add(label)
 end
 
-local function refreshDropdown()
-    sele:Clear()
-    updatePlayerLookup()
-    for label in pairs(playerLookup) do
-        sele:Add(label)
+function FollowSystem:RemovePlayer(player)
+    for label, p in pairs(self.PlayerMap) do
+        if p == player then
+            self.PlayerMap[label] = nil
+            break
+        end
+    end
+    if self.Target == player then
+        self.Target = nil
+        self.Enabled = false
     end
 end
 
+local sele = Godmode:AddDropdown("Select Player", function(label)
+    local player = FollowSystem.PlayerMap[label]
+    if not player then return end
+    FollowSystem.Target = player
+    FollowSystem.Enabled = true
+end)
+
+for _, player in ipairs(Players:GetPlayers()) do
+    FollowSystem:AddPlayer(player, sele)
+end
+
 Players.PlayerAdded:Connect(function(player)
-    if player ~= LocalPlayer then
-        refreshDropdown()
-    end
+    FollowSystem:AddPlayer(player, sele)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    refreshDropdown()
-    if currentTargetName == player.Name then
-        currentTargetName = nil
-        isFollowing = false
-    end
+    FollowSystem:RemovePlayer(player)
 end)
 
 Godmode:AddButton("Stop Following", function()
-    isFollowing = false
-    currentTargetName = nil
-    print(".")
+    FollowSystem.Enabled = false
+    FollowSystem.Target = nil
 end)
 
 task.spawn(function()
-    while task.wait(0.03) do
-        if isFollowing and currentTargetName then
-            local targetPlayer = Players:FindFirstChild(currentTargetName)
-            if targetPlayer then
-                moveBehindTarget(targetPlayer)
-            else
-                isFollowing = false
-                currentTargetName = nil
-            end
-        end
+    while task.wait(0.05) do
+        FollowSystem:SnapToTarget()
     end
 end)
 
 LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1)
-    if isFollowing and currentTargetName then
-        local targetPlayer = Players:FindFirstChild(currentTargetName)
-        if targetPlayer then
-            moveBehindTarget(targetPlayer)
-        end
-    end
+    task.wait(0.5)
+    FollowSystem:SnapToTarget()
 end)
+
+local isBrawlEnabled = false
+local autoSlamEnabled = false
+local autoStompEnabled = false
 
 Godmode:AddSwitch("Brawl Mode (Auto Slam)", function(enabled)
     isBrawlEnabled = enabled
@@ -1766,8 +1718,6 @@ Godmode:AddSwitch("Brawl Mode (Auto Slam)", function(enabled)
     end
 end)
 
-local autoSlamEnabled = false
-
 Godmode:AddSwitch("Auto Slam", function(state)
     autoSlamEnabled = state
     if state then
@@ -1795,9 +1745,6 @@ Godmode:AddSwitch("Auto Slam", function(state)
     end
 end)
 
-local isBrawlEnabled = false
-local autoStompEnabled = false
-
 Godmode:AddSwitch("Auto Stomp", function(state)
     autoStompEnabled = state
     if state then
@@ -1823,207 +1770,4 @@ Godmode:AddSwitch("Auto Stomp", function(state)
             end
         end)
     end
-end)
-
-local inv = Inventory:AddLabel("Inventory:")
-inv.TextSize = 35
-
-local eggy = {
-	eggs = Inventory:AddLabel("Eggs: 0"),
-	selectedPlayer = nil,
-	eggAmount = 0,
-}
-
-eggy.eggs.TextColor3 = Color3.fromRGB(255, 165, 0)
-eggy.eggs.TextSize = 20
-
-local sha = {
-	shakeCountLabel = Inventory:AddLabel("Tropical Shakes: 0"),
-	selectedPlayer = nil,
-	shakeAmount = 0,
-}
-
-sha.shakeCountLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
-sha.shakeCountLabel.TextSize = 20
-
-local eggEaterState = { running = false }
-
-task.spawn(function()
-	while true do
-		if eggEaterState.running then
-			local tool =
-				PlayerData.Player.Character:FindFirstChild("Protein Egg")
-				or PlayerData.Player.Backpack:FindFirstChild("Protein Egg")
-			if tool then
-				PlayerData.Player.muscleEvent:FireServer("proteinEgg", tool)
-			end
-			task.wait(0.1)
-		else
-			task.wait(1)
-		end
-	end
-end)
-
-Inventory:AddSwitch("Eat All Eggs", function(state)
-	eggEaterState.running = state
-end):Set(false)
-
-local boostState = {
-	itemList = {
-		"Tropical Shake",
-		"Energy Shake",
-		"Protein Bar",
-		"TOUGH Bar",
-		"Protein Shake",
-		"ULTRA Shake",
-		"Energy Bar",
-	},
-	running = false,
-}
-
-task.spawn(function()
-	while true do
-		if boostState.running then
-			for _, itemName in ipairs(boostState.itemList) do
-				local tool =
-					PlayerData.Player.Character:FindFirstChild(itemName)
-					or PlayerData.Player.Backpack:FindFirstChild(itemName)
-				if tool then
-					local parts = {}
-					for word in itemName:gmatch("%S+") do
-						table.insert(parts, word:lower())
-					end
-					for i = 2, #parts do
-						parts[i] = parts[i]:sub(1, 1):upper() .. parts[i]:sub(2)
-					end
-					for _ = 1, 10 do
-						PlayerData.Player.muscleEvent:FireServer(table.concat(parts), tool)
-					end
-				end
-			end
-		end
-		task.wait(0.1)
-	end
-end)
-
-Inventory:AddSwitch("Eat Everything Except Eggs", function(state)
-	boostState.running = state
-end)
-
-Inventory:AddLabel("-------------------------------------")
-local eg = Inventory:AddLabel("Egg Gifting:")
-eg.TextColor3 = Color3.fromRGB(255, 0, 0)
-eg.TextSize = 35
-
-local eggPlayerDropdown = Inventory:AddDropdown("Choose Player", function(name)
-	local username = name:match(" | (.+)") or name
-	eggy.selectedPlayer = Services.Players:FindFirstChild(username)
-end)
-
-for _, player in ipairs(Services.Players:GetPlayers()) do
-	if player ~= Services.Players.LocalPlayer then
-		eggPlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
-	end
-end
-
-Services.Players.PlayerAdded:Connect(function(player)
-	if player ~= Services.Players.LocalPlayer then
-		eggPlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
-	end
-end)
-
-Services.Players.PlayerRemoving:Connect(function(player)
-	eggPlayerDropdown:Remove(player.DisplayName .. " | " .. player.Name)
-
-	if eggy.selectedPlayer == player then
-		eggy.selectedPlayer = nil
-	end
-end)
-
-local am = Inventory:AddTextBox("Amount:", function(text)
-	eggy.eggAmount = tonumber(text)
-end)
-
-Inventory:AddButton("Start Gifting", function()
-	if eggy.selectedPlayer and eggy.eggAmount and eggy.eggAmount > 0 then
-		local egg =
-			Services.Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
-		if egg then
-			for _ = 1, eggy.eggAmount do
-				pcall(function()
-					Services.ReplicatedStorage.rEvents.giftRemote:InvokeServer(
-						"giftRequest",
-						eggy.selectedPlayer,
-						egg
-					)
-				end)
-				task.wait(0.1)
-			end
-		end
-	end
-end)
-
-Inventory:AddLabel("-------------------------------------")
-local sh = Inventory:AddLabel("Shake Gifting:")
-sh.TextColor3 = Color3.fromRGB(255, 0, 0)
-sh.TextSize = 35
-
-local shakePlayerDropdown = Inventory:AddDropdown("Choose Player", function(name)
-	local username = name:match(" | (.+)") or name
-	sha.selectedPlayer = Services.Players:FindFirstChild(username)
-end)
-
-for _, player in ipairs(Services.Players:GetPlayers()) do
-	if player ~= Services.Players.LocalPlayer then
-		shakePlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
-	end
-end
-
-Services.Players.PlayerAdded:Connect(function(player)
-	if player ~= Services.Players.LocalPlayer then
-		shakePlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
-	end
-end)
-
-Services.Players.PlayerRemoving:Connect(function(player)
-	shakePlayerDropdown:Remove(player.DisplayName .. " | " .. player.Name)
-
-	if sha.selectedPlayer == player then
-		sha.selectedPlayer = nil
-	end
-end)
-
-local shakeAmountInput = Inventory:AddTextBox("Amount:", function(text)
-	sha.shakeAmount = tonumber(text)
-end)
-
-Inventory:AddButton("Start Gifting", function()
-	if sha.selectedPlayer and sha.shakeAmount and sha.shakeAmount > 0 then
-		for _ = 1, sha.shakeAmount do
-			Services.ReplicatedStorage.rEvents.giftRemote:InvokeServer(
-				"giftRequest",
-				sha.selectedPlayer,
-				Services.Players.LocalPlayer.consumablesFolder:FindFirstChild("Tropical Shake")
-			)
-		end
-	end
-end)
-
-task.spawn(function()
-	while true do
-		local eggCount = 0
-		local shakeCount = 0
-		if PlayerData.Backpack then
-			for _, item in ipairs(PlayerData.Backpack:GetChildren()) do
-				if item.Name == "Protein Egg" then
-					eggCount += 1
-				elseif item.Name == "Tropical Shake" then
-					shakeCount += 1
-				end
-			end
-		end
-		eggy.eggCountLabel.Text = "Protein Eggs: " .. eggCount
-		sha.shakeCountLabel.Text = "Tropical Shakes: " .. shakeCount
-		task.wait(7.5)
-	end
 end)
