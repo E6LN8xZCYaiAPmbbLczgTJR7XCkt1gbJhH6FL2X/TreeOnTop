@@ -53,10 +53,10 @@ function Utils.greeting()
 	return "Hello " .. PlayerData.DisplayName
 end
 
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/E6LN8xZCYaiAPmbbLczgTJR7XCkt1gbJhH6FL2X/TreeOnTop/refs/heads/main/DonkeyUi.lua", true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/E6LN8xZCYaiAPmbbLczgTJR7XCkt1gbJhH6FL2X/TreeOnTop/refs/heads/main/DESTROYERUI", true))()
 
-local window = library:AddWindow("TREE | Private Killing |" .. Utils.greeting(), {
-	main_color = Color3.fromRGB(96, 96, 96),
+local window = library:AddWindow("DESTROYER | Private Killing | " .. Utils.greeting(), {
+	main_color = Color3.fromRGB(0, 0, 0),
 	min_size = Vector2.new(500, 750)
 })
 
@@ -65,10 +65,11 @@ Main:Show()
 Killing = window:AddTab("          Killing          ")
 Stats = window:AddTab("          Stats          ")
 Godmode = window:AddTab("          Godmode          ")
+Inventory = window:AddTab("          Inventory          ")
 
 local cr = Main:AddLabel("Credits: Tree")
 cr.TextSize = 50
-Main:AddLabel("-------------------------------------")
+Main:AddLabel("-----------------------------------------------------------------------------")
 local es = Main:AddLabel("Essentials:")
 es.TextSize = 35
 
@@ -130,15 +131,6 @@ PlayerData.Player.CharacterAdded:Connect(function(newChar)
 	if Protection.AntiFling.Enabled then eAntiFling() end
 end)
 
-local HideFrames = Main:AddSwitch("Hide Frames", function(bool)
-    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
-        if obj.Name:match("Frame$") then
-            obj.Visible = not bool
-        end
-    end
-end)
-HideFrames:Set(true)
-
 local WaterParts = {
 	Parts = {},
 	PartSize = 2048,
@@ -175,6 +167,15 @@ local WalkonWater = Main:AddSwitch("Walk on Water", function(bool)
 	end
 end)
 WalkonWater:Set(false)
+
+local HideFrames = Main:AddSwitch("Hide Frames", function(bool)
+    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
+        if obj.Name:match("Frame$") then
+            obj.Visible = not bool
+        end
+    end
+end)
+HideFrames:Set(true)
 
 local ShowPets = Main:AddSwitch("Show Pets", function(bool)
 	if PlayerData.Player:FindFirstChild("hidePets") then
@@ -518,7 +519,7 @@ Killing:AddSwitch("Egg + Nan Combo", function(bool)
 	end
 end)
 
-Killing:AddLabel("-------------------------------------")
+Killing:AddLabel("-----------------------------------------------------------------------------")
 ki = Killing:AddLabel("Kill All:")
 ki.TextSize = 35
 
@@ -609,7 +610,7 @@ Killing:AddSwitch("Kill All", function(bool)
 	end
 end)
 
-Killing:AddLabel("-------------------------------------")
+Killing:AddLabel("-----------------------------------------------------------------------------")
 ta = Killing:AddLabel("Targeting:")
 ta.TextSize = 35
 
@@ -922,7 +923,7 @@ SpectateData.LocalPlayerRespawnConnection = Services.Players.LocalPlayer.Charact
 	end
 end)
 
-Killing:AddLabel("-------------------------------------")
+Killing:AddLabel("-----------------------------------------------------------------------------")
 local wh = Killing:AddLabel("Whitelist: None")
 wh.TextColor3 = Color3.fromRGB(0, 255, 0)
 wh.TextSize = 35
@@ -1065,7 +1066,7 @@ local addt = Killing:AddTextBox("Add to Blacklist", function(txt)
 	if not isAnyActive() then autoPunchActive = false end
 end, {["placeholder"] = "ER: KTA, ZTX, ZE"})
 
-local re = Killing:AddTextBox("Remove from Clan Blacklist", function(txt)
+local re = Killing:AddTextBox("Remove From Clan Blacklist", function(txt)
 	local toRemove = {}
 	for w in string.gmatch(txt, "[^,]+") do
 		local t = trim(w):lower()
@@ -1218,7 +1219,7 @@ task.spawn(function()
 	end
 end)
 
-Stats:AddLabel("-------------------------------------")
+Stats:AddLabel("-----------------------------------------------------------------------------")
 
 local AdvancedStats = {
 	HealthLabel = Stats:AddLabel("Enemy Health: N/A"),
@@ -1319,7 +1320,6 @@ task.spawn(function()
 end)
 
 mis = Godmode:AddLabel("Misc:")
-mis.TextColor3 = Color3.fromRGB(255, 255, 255)
 mis.TextSize = 35
 local pa = Godmode:AddLabel("Pack Delay: 0.35s")
 pa.TextColor3 = Color3.fromRGB(255, 165, 0)
@@ -1585,7 +1585,7 @@ for _, size in ipairs({1, 2, 15, 30}) do
     end)
 end
 
-Godmode:AddLabel("-------------------------------------")
+Godmode:AddLabel("-----------------------------------------------------------------------------")
 go = Godmode:AddLabel("Godmode Kill:")
 go.TextSize = 35
 
@@ -1681,7 +1681,7 @@ task.spawn(function()
 end)
 
 LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(0.5)
+    task.wait(0.25)
     FollowSystem:SnapToTarget()
 end)
 
@@ -1770,4 +1770,154 @@ Godmode:AddSwitch("Auto Stomp", function(state)
             end
         end)
     end
+end)
+
+local inv = Inventory:AddLabel("Inventory:")
+inv.TextSize = 35
+
+local EggEaterData = {Running = false}
+
+task.spawn(function()
+	while true do
+		if EggEaterData.Running then
+			local tool = PlayerData.Player.Character:FindFirstChild("Protein Egg") or PlayerData.Player.Backpack:FindFirstChild("Protein Egg")
+			if tool then PlayerData.Player.muscleEvent:FireServer("proteinEgg", tool) end
+			task.wait(0.1)
+		else
+			task.wait(1)
+		end
+	end
+end)
+
+Inventory:AddSwitch("Eat All Eggs", function(state) EggEaterData.Running = state end):Set(false)
+
+local BoostData = {
+	ItemList = {"Tropical Shake", "Energy Shake", "Protein Bar", "TOUGH Bar", "Protein Shake", "ULTRA Shake", "Energy Bar"},
+	Running = false
+}
+
+task.spawn(function()
+	while true do
+		if BoostData.Running then
+			for _, itemName in ipairs(BoostData.ItemList) do
+				local tool = PlayerData.Player.Character:FindFirstChild(itemName) or PlayerData.Player.Backpack:FindFirstChild(itemName)
+				if tool then
+					local parts = {}
+					for word in itemName:gmatch("%S+") do table.insert(parts, word:lower()) end
+					for i = 2, #parts do parts[i] = parts[i]:sub(1, 1):upper() .. parts[i]:sub(2) end
+					for i = 1, 10 do PlayerData.Player.muscleEvent:FireServer(table.concat(parts), tool) end
+				end
+			end
+		end
+		task.wait(0.1)
+	end
+end)
+
+Inventory:AddSwitch("Eat All Boosts Except Eggs", function(state) BoostData.Running = state end)
+
+Inventory:AddLabel("-----------------------------------------------------------------------------")
+
+local eggy =Inventory:AddLabel("Egg Gifting:")
+eggy.TextColor3 = Color3.fromRGB(255, 0, 0)
+eggy.TextSize = 35
+
+local EggGifterData = {ProteinEggLabel = Inventory:AddLabel("Protein Eggs: 0"), SelectedPlayer = nil, EggCount = 0}
+EggGifterData.ProteinEggLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
+EggGifterData.ProteinEggLabel.TextSize = 20
+
+local playerDropdown = Inventory:AddDropdown("Choose Player", function(name)
+    local username = name:match(" | (.+)") or name
+    EggGifterData.SelectedPlayer = Services.Players:FindFirstChild(username)
+end)
+
+for _, player in ipairs(Services.Players:GetPlayers()) do
+    if player ~= Services.Players.LocalPlayer then
+        playerDropdown:Add(player.DisplayName .. " | " .. player.Name)
+    end
+end
+
+Services.Players.PlayerAdded:Connect(function(player)
+    if player ~= Services.Players.LocalPlayer then
+        playerDropdown:Add(player.DisplayName .. " | " .. player.Name)
+    end
+end)
+
+Services.Players.PlayerRemoving:Connect(function(player)
+    playerDropdown:Remove(player.DisplayName .. " | " .. player.Name)
+    if EggGifterData.SelectedPlayer == player then EggGifterData.SelectedPlayer = nil end
+end)
+
+Inventory:AddTextBox("Amount:", function(Text) EggGifterData.EggCount = tonumber(Text) end)
+
+Inventory:AddButton("Start Gifting", function()
+    if EggGifterData.SelectedPlayer and EggGifterData.EggCount and EggGifterData.EggCount > 0 then
+        local egg = Services.Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
+        if egg then
+            for i = 1, EggGifterData.EggCount do
+                pcall(function()
+                    Services.ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", EggGifterData.SelectedPlayer, egg)
+                end)
+                task.wait(0.1)
+            end
+        end
+    end
+end)
+
+Inventory:AddLabel("-----------------------------------------------------------------------------")
+
+local shakey = Inventory:AddLabel("Shake Gifting:")
+shakey.TextColor3 = Color3.fromRGB(255, 0, 0)
+shakey.TextSize = 35
+
+local ShakeGifterData = {TropicalShakeLabel = Inventory:AddLabel("Tropical Shakes: 0"), SelectedPlayer = nil, ShakeCount = 0}
+ShakeGifterData.TropicalShakeLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
+ShakeGifterData.TropicalShakeLabel.TextSize = 20
+
+local playerDropdown3 = Inventory:AddDropdown("Choose Player", function(name)
+	local usernameone = name:match(" | (.+)") or name
+	ShakeGifterData.SelectedPlayer = Services.Players:FindFirstChild(usernameone)
+end)
+
+for _, player in ipairs(Services.Players:GetPlayers()) do
+	if player ~= Services.Players.LocalPlayer then
+		playerDropdown3:Add(player.DisplayName .. " | " .. player.Name)
+	end
+end
+
+Services.Players.PlayerAdded:Connect(function(player)
+	if player ~= Services.Players.LocalPlayer then
+		playerDropdown3:Add(player.DisplayName .. " | " .. player.Name)
+	end
+end)
+
+Services.Players.PlayerRemoving:Connect(function(player)
+	playerDropdown3:Remove(player.DisplayName .. " | " .. player.Name)
+	if ShakeGifterData.SelectedPlayer == player then ShakeGifterData.SelectedPlayer = nil end
+end)
+
+Inventory:AddTextBox("Amount:", function(Text) ShakeGifterData.ShakeCount = tonumber(Text) end)
+
+Inventory:AddButton("Start Gifting", function()
+	if ShakeGifterData.SelectedPlayer and ShakeGifterData.ShakeCount and ShakeGifterData.ShakeCount > 0 then
+		for i = 1, ShakeGifterData.ShakeCount do
+			Services.ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", ShakeGifterData.SelectedPlayer, 
+				Services.Players.LocalPlayer.consumablesFolder:FindFirstChild("Tropical Shake"))
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		local proteinEggCount = 0
+		local tropicalShakeCount = 0
+		if PlayerData.Backpack then
+			for _, item in ipairs(PlayerData.Backpack:GetChildren()) do
+				if item.Name == "Protein Egg" then proteinEggCount = proteinEggCount + 1
+				elseif item.Name == "Tropical Shake" then tropicalShakeCount = tropicalShakeCount + 1 end
+			end
+		end
+		EggGifterData.ProteinEggLabel.Text = "Protein Eggs: " .. proteinEggCount
+		ShakeGifterData.TropicalShakeLabel.Text = "Tropical Shakes: " .. tropicalShakeCount
+		task.wait(7.5)
+	end
 end)
