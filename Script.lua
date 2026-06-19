@@ -57,10 +57,10 @@ function Utils.greeting()
 	return "Hello " .. PlayerData.DisplayName
 end
 
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/E6LN8xZCYaiAPmbbLczgTJR7XCkt1gbJhH6FL2X/TreeOnTop/refs/heads/main/Ui.lua", true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/E6LN8xZCYaiAPmbbLczgTJR7XCkt1gbJhH6FL2X/TreeOnTop/refs/heads/main/DonkeyUi.lua", true))()
 
 local window = library:AddWindow("TREE | Private Killing |" .. Utils.greeting(), {
-	main_color = Color3.fromRGB(0, 0, 0),
+	main_color = Color3.fromRGB(96, 96, 96),
 	min_size = Vector2.new(500, 750)
 })
 
@@ -72,13 +72,9 @@ Godmode = window:AddTab("     Godmode     ")
 Inventory = window:AddTab("     Inventory     ")
 
 local cr = Main:AddLabel("Credits: Tree")
-cr.TextColor3 = Color3.fromRGB(255, 255, 255)
-cr.Font = Enum.Font.PermanentMarker
 cr.TextSize = 50
-Main:AddLabel("———————————————————————————————")
+Main:AddLabel("-------------------------------------")
 local es = Main:AddLabel("Essentials:")
-es.TextColor3 = Color3.fromRGB(255, 255, 255)
-es.Font = Enum.Font.PermanentMarker
 es.TextSize = 35
 
 local function deleteAds()
@@ -132,7 +128,7 @@ end
 Main:AddSwitch("Anti Fling", function(bool)
 	Protection.AntiFling.Enabled = bool
 	if bool then eAntiFling() else dAntiFling() end
-end):Set(false)
+end):Set(true)
 
 PlayerData.Player.CharacterAdded:Connect(function(newChar)
 	newChar:WaitForChild("HumanoidRootPart", 5)
@@ -176,37 +172,6 @@ local WalkonWater = Main:AddSwitch("Walk on Water", function(bool)
 end)
 WalkonWater:Set(false)
 
-Main:AddButton("Load Infinite Yield", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-end)
-
-local HideFrames = Main:AddSwitch("Hide Frames", function(bool)
-    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
-        if obj.Name:match("Frame$") then
-            obj.Visible = not bool
-        end
-    end
-end)
-HideFrames:Set(true)
-
-local ShowPets = Main:AddSwitch("Show Pets", function(bool)
-    if PlayerData.Player:FindFirstChild("hidePets") then
-        PlayerData.Player.hidePets.Value = bool
-    end
-end)
-ShowPets:Set(false)
-
-local ShowotherPets = Main:AddSwitch("Show other Pets", function(bool)
-	if PlayerData.Player:FindFirstChild("showOtherPetsOn") then
-		PlayerData.Player.showOtherPetsOn.Value = bool
-	end
-end)
-ShowotherPets:Set(false)
-
-Main:AddButton("Rejoin Server", function()
-    game:GetService("TeleportService"):Teleport(game.PlaceId, lp)
-end)
-
 local function checkCharacter()
 	if not Services.Players.LocalPlayer.Character then
 		repeat task.wait() until Services.Players.LocalPlayer.Character
@@ -239,11 +204,9 @@ local function killPlayer(target)
 end
 
 mi = Killing:AddLabel("Miscellaneous:")
-mi.TextColor3 = Color3.fromRGB(255, 255, 255)
-mi.Font = Enum.Font.PermanentMarker
 mi.TextSize = 35
 
-local SelectPet = Killing:AddDropdown("Select Pet", function(text)
+local SelectPackPet = Killing:AddDropdown("Select Pack Pet", function(text)
 	for _, folder in pairs(Services.Players.LocalPlayer.petsFolder:GetChildren()) do
 		if folder:IsA("Folder") then
 			for _, pet in pairs(folder:GetChildren()) do
@@ -263,7 +226,7 @@ local SelectPet = Killing:AddDropdown("Select Pet", function(text)
 end)
 
 for _, petName in ipairs({"Wild Wizard", "Mighty Monster"}) do
-	SelectPet:Add(petName)
+	SelectPackPet:Add(petName)
 end
 
 Killing:AddSwitch("Remove Attack Animations", function(bool)
@@ -481,7 +444,7 @@ end)
 
 local NanData = {Enabled = false}
 
-Killing:AddSwitch("NaN + Egg", function(bool)
+Killing:AddSwitch("Egg + Nan Combo", function(bool)
 	NanData.Enabled = bool
 	if bool then
 		Remotes.ChangeSpeedSize:InvokeServer("changeSize", 0 / 0)
@@ -505,14 +468,11 @@ Killing:AddSwitch("NaN + Egg", function(bool)
 	end
 end)
 
-Killing:AddLabel("———————————————————————————————")
+Killing:AddLabel("-------------------------------------")
 ki = Killing:AddLabel("Kill All:")
-ki.TextColor3 = Color3.fromRGB(255, 255, 255)
-ki.Font = Enum.Font.PermanentMarker
 ki.TextSize = 35
 
 _G.whitelistedPlayers = _G.whitelistedPlayers or {}
-
 _G.blacklistedPlayers = _G.blacklistedPlayers or {}
 
 local function isWhitelisted(player)
@@ -564,7 +524,7 @@ Killing:AddSwitch("Whitelist Friends", function(bool)
 					if player ~= Services.Players.LocalPlayer and player:IsFriendsWith(Services.Players.LocalPlayer.UserId) then
 						if not isWhitelisted(player) then
 							table.insert(_G.whitelistedPlayers, player.Name)
-							print("EAT MY PUSSY BITCH:", player.Name)
+							print(".:", player.Name)
 						end
 					end
 				end
@@ -599,10 +559,8 @@ Killing:AddSwitch("Kill All", function(bool)
 	end
 end)
 
-Killing:AddLabel("———————————————————————————————")
+Killing:AddLabel("-------------------------------------")
 ta = Killing:AddLabel("Targeting:")
-ta.TextColor3 = Color3.fromRGB(255, 255, 255)
-ta.Font = Enum.Font.PermanentMarker
 ta.TextSize = 35
 
 local add = Killing:AddDropdown("Add to Blacklist", function(selectedText)
@@ -629,7 +587,6 @@ end)
 
 local autoBringEnabled = false
 local autoBringConnection
-
 local Players = Services.Players
 local RunService = Services.RunService
 local LocalPlayer = PlayerData.Player
@@ -656,9 +613,7 @@ end
 
 local function zeroVelocity(rootPart)
 	if not rootPart then return end
-
 	rootPart.Velocity = Vector3.zero
-
 	if typeof(rootPart.AssemblyLinearVelocity) == "Vector3" then
 		rootPart.AssemblyLinearVelocity = Vector3.zero
 		rootPart.AssemblyAngularVelocity = Vector3.zero
@@ -717,7 +672,6 @@ end)
 local isEnabled = false
 local characterAddedConnection = nil
 local savedCFrame = nil
-
 local Players = Services.Players
 local LocalPlayer = PlayerData.Player
 
@@ -927,7 +881,7 @@ local function updatePlayerList()
 	return Services.Players:GetPlayers()
 end
 
-local ch = Killing:AddDropdown("Choose Player", function(text)
+local se = Killing:AddDropdown("Select Player to Spectate", function(text)
 	for _, player in ipairs(updatePlayerList()) do
 		local optionText = player.DisplayName .. " | " .. player.Name
 		if text == optionText then
@@ -966,7 +920,7 @@ Killing:AddSwitch("Spectate", function(bool)
 end)
 
 for _, player in ipairs(updatePlayerList()) do
-	ch:Add(player.DisplayName .. " | " .. player.Name)
+	se:Add(player.DisplayName .. " | " .. player.Name)
 end
 
 Services.Players.PlayerAdded:Connect(function(player)
@@ -1014,20 +968,15 @@ SpectateData.LocalPlayerRespawnConnection = Services.Players.LocalPlayer.Charact
 	end
 end)
 
-Killing:AddLabel("———————————————————————————————")
-
+Killing:AddLabel("-------------------------------------")
 local wh = Killing:AddLabel("Whitelist: None")
-
 wh.TextColor3 = Color3.fromRGB(0, 255, 0)
-wh.Font = Enum.Font.PermanentMarker
 wh.TextSize = 35
 
 Killing:AddButton("Clear Whitelist", function() _G.whitelistedPlayers = {} end)
 
 local bl = Killing:AddLabel("Blacklist: None")
-
 bl.TextColor3 = Color3.fromRGB(255, 0, 0)
-bl.Font = Enum.Font.PermanentMarker
 bl.TextSize = 35
 
 Killing:AddButton("Clear Blacklist", function() _G.blacklistedPlayers = {} end)
@@ -1040,7 +989,7 @@ task.spawn(function()
 	end
 end)
 
-local fileName = "Blacklist"..LocalPlayer.Name..".txt"
+local fileName = "TreeBlacklist"..LocalPlayer.Name..".txt"
 local blacklistWords = {}
 local active = {}
 local attackDelay = 0.01
@@ -1083,7 +1032,6 @@ end
 
 local function refreshActive()
 	for k in pairs(active) do active[k] = nil end
-
 	for _, plr in ipairs(Players:GetPlayers()) do
 		if plr ~= LocalPlayer and nameMatchesAny(plr) then
 			active[plr] = true
@@ -1153,7 +1101,6 @@ cl = Killing:AddLabel("")
 cl.Text = (#blacklistWords == 0 and "Clan Blacklist: None" or "Clan Blacklist: "..table.concat(blacklistWords, ","))
 
 cl.TextColor3 = Color3.fromRGB(255, 0, 0)
-cl.Font = Enum.Font.PermanentMarker
 cl.TextSize = 35
 
 local addt = Killing:AddTextBox("Add to Blacklist", function(txt)
@@ -1163,8 +1110,6 @@ local addt = Killing:AddTextBox("Add to Blacklist", function(txt)
 	refreshActive()
 	if not isAnyActive() then autoPunchActive = false end
 end, {["placeholder"] = "ER: KTA, ZTX, ZE"})
-
-addt.Font = Enum.Font.PermanentMarker
 
 local re = Killing:AddTextBox("Remove from Clan Blacklist", function(txt)
 	local toRemove = {}
@@ -1184,8 +1129,6 @@ local re = Killing:AddTextBox("Remove from Clan Blacklist", function(txt)
 	refreshActive()
 	if not isAnyActive() then autoPunchActive = false end
 end)
-
-re.Font = Enum.Font.PermanentMarker
 
 RunService.Heartbeat:Connect(function()
 	refreshActive()
@@ -1248,28 +1191,23 @@ end)
 waitForCharacter()
 refreshActive()
 
-local PlayerStatsLabel = Stats:AddLabel("Stats:")
-
-PlayerStatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-PlayerStatsLabel.Font = Enum.Font.PermanentMarker
-PlayerStatsLabel.TextSize = 35
-
-local StatsLabel = Enum.Font.PermanentMarker
+local st = Stats:AddLabel("Stats:")
+st.TextSize = 35
 
 local SpecsData = {
 	PlayerToInspect = nil,
 	EmojiMap = {
 		["Strength"] = utf8.char(0x1F4AA),
-		["Durability"] = utf8.char(0x1F4AA),
+		["Durability"] = utf8.char(0x1F44A)
 	},
 	StatDefinitions = {
 		{name = "Strength", statName = "Strength"},
-		{name = "Durability", statName = "Durability"},
+		{name = "Durability", statName = "Durability"}
 	},
 	StatLabels = {}
 }
 
-local cho = Stats:AddDropdown("Choose Player", function(text)
+local specdropdown = Stats:AddDropdown("Choose Player", function(text)
 	for _, player in ipairs(Services.Players:GetPlayers()) do
 		if text == player.DisplayName .. " | " .. player.Name then
 			SpecsData.PlayerToInspect = player
@@ -1279,85 +1217,65 @@ local cho = Stats:AddDropdown("Choose Player", function(text)
 end)
 
 for _, player in ipairs(Services.Players:GetPlayers()) do
-	cho:Add(player.DisplayName .. " | " .. player.Name)
+	specdropdown:Add(player.DisplayName .. " | " .. player.Name)
 end
 
 Services.Players.PlayerAdded:Connect(function(player)
-	cho:Add(player.DisplayName .. " | " .. player.Name)
+	specdropdown:Add(player.DisplayName .. " | " .. player.Name)
 end)
 
 Services.Players.PlayerRemoving:Connect(function()
-	cho:Clear()
+	specdropdown:Clear()
 	for _, p in ipairs(Services.Players:GetPlayers()) do
-		cho:Add(p.DisplayName .. " | " .. p.Name)
+		specdropdown:Add(p.DisplayName .. " | " .. p.Name)
 	end
 end)
 
+local playerNameLabel = Stats:AddLabel("Selected User: N/A")
+playerNameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+
 for _, info in ipairs(SpecsData.StatDefinitions) do
 	local label = Stats:AddLabel(
-		SpecsData.EmojiMap[info.name] .. " " .. info.name .. ": N/A"
+		SpecsData.EmojiMap[info.name] .. " " .. info.name .. ": 0 (0)"
 	)
-	label.Font = StatsLabel
 	label.TextColor3 = Color3.fromRGB(255, 255, 0)
 	SpecsData.StatLabels[info.name] = label
 end
 
 local function updateStatLabels(targetPlayer)
 	if not targetPlayer then return end
+	playerNameLabel.Text = "Selected User: " .. targetPlayer.DisplayName
 	if not targetPlayer:FindFirstChild("leaderstats") then return end
 	for _, info in ipairs(SpecsData.StatDefinitions) do
-		local statObject =
-			targetPlayer.leaderstats:FindFirstChild(info.statName)
-			or targetPlayer:FindFirstChild(info.statName)
+		local statObject = targetPlayer.leaderstats:FindFirstChild(info.statName) or targetPlayer:FindFirstChild(info.statName)
 		if statObject then
-			SpecsData.StatLabels[info.name].Text =
-				string.format(
-					"%s %s: %s (%s)",
-					SpecsData.EmojiMap[info.name] or "",
-					info.name,
-					Utils.formatNumber(statObject.Value),
-					Utils.formatWithCommas(statObject.Value)
-				)
+			SpecsData.StatLabels[info.name].Text = string.format("%s %s: %s (%s)", SpecsData.EmojiMap[info.name] or "", info.name, 
+				Utils.formatNumber(statObject.Value), Utils.formatWithCommas(statObject.Value))
 		else
-			SpecsData.StatLabels[info.name].Text =
-				SpecsData.EmojiMap[info.name] .. " " .. info.name .. ": 0 (0)"
+			SpecsData.StatLabels[info.name].Text = SpecsData.EmojiMap[info.name] .. " " .. info.name .. ": 0 (0)"
 		end
 	end
 end
 
 task.spawn(function()
 	while true do
-		if SpecsData.PlayerToInspect then
-			updateStatLabels(SpecsData.PlayerToInspect)
-		end
+		if SpecsData.PlayerToInspect then updateStatLabels(SpecsData.PlayerToInspect) end
 		task.wait(0.1)
 	end
 end)
 
-Stats:AddLabel("———————————————————————————————")
-
-local adv = Stats:AddLabel("Advanced Stats:")
-adv.Font = StatsLabel
-adv.TextColor3 = Color3.fromRGB(255, 255, 255)
-adv.TextSize = 35
-
-local function createStatLabel(text)
-	local label = Stats:AddLabel(text)
-	label.Font = StatsLabel
-	return label
-end
+Stats:AddLabel("-------------------------------------")
 
 local AdvancedStats = {
-	HealthLabel = createStatLabel("Enemy Health: N/A"),
-	EnemyDamageLabel = createStatLabel("Enemy Damage: N/A"),
-	PlayerHealthLabel = createStatLabel("Your Health: N/A"),
-	PlayerDamageLabel = createStatLabel("Your Damage: N/A"),
-	HitsToKillLabel = createStatLabel("Hits to Kill: N/A")
+	HealthLabel = Stats:AddLabel("Enemy Health: N/A"),
+	EnemyDamageLabel = Stats:AddLabel("Enemy Damage: N/A"),
+	PlayerHealthLabel = Stats:AddLabel("Your Health: N/A"),
+	PlayerDamageLabel = Stats:AddLabel("Your Damage: N/A"),
+	HitsToKillLabel = Stats:AddLabel("Hits to Kill: N/A")
 }
 
 AdvancedStats.HealthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 AdvancedStats.EnemyDamageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-
 AdvancedStats.PlayerHealthLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 AdvancedStats.PlayerDamageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 AdvancedStats.HitsToKillLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -1372,25 +1290,21 @@ local StatsCache = {
 
 local function calculatePlayerHealth(targetPlayer)
 	if not targetPlayer then return 0 end
-	local durabilityStat =
-		targetPlayer:FindFirstChild("Durability")
-		or (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Durability"))
-
+	local durabilityStat = targetPlayer:FindFirstChild("Durability") or 
+		(targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Durability"))
 	if not durabilityStat then return 0 end
 	local totalMultiplier = 1
-	if targetPlayer:FindFirstChild("ultimatesFolder")
-		and targetPlayer.ultimatesFolder:FindFirstChild("Infernal Health") then
-		totalMultiplier += 0.15 * (targetPlayer.ultimatesFolder["Infernal Health"].Value or 0)
+	if targetPlayer:FindFirstChild("ultimatesFolder") and targetPlayer.ultimatesFolder:FindFirstChild("Infernal Health") then
+		totalMultiplier = totalMultiplier + 0.15 * (targetPlayer.ultimatesFolder["Infernal Health"].Value or 0)
 	end
 	if targetPlayer:FindFirstChild("equippedPets") then
 		for _, petValue in ipairs(targetPlayer.equippedPets:GetChildren()) do
 			if petValue:IsA("ObjectValue") and petValue.Value then
-				local name = string.lower(petValue.Value.Name)
-				if name:match("mighty") and name:match("monster") then
-					totalMultiplier += 0.5
+				if string.lower(petValue.Value.Name):match("mighty") and string.lower(petValue.Value.Name):match("monster") then
+					totalMultiplier = totalMultiplier + 0.5
 				end
-				if name:match("small") and name:match("fry") then
-					totalMultiplier += 0.25
+				if string.lower(petValue.Value.Name):match("small") and string.lower(petValue.Value.Name):match("fry") then
+					totalMultiplier = totalMultiplier + 0.25
 				end
 			end
 		end
@@ -1400,23 +1314,20 @@ end
 
 local function calculatePlayerDamage(targetPlayer)
 	if not targetPlayer then return 0 end
-	if not targetPlayer:FindFirstChild("leaderstats") then return 0 end
-	if not targetPlayer.leaderstats:FindFirstChild("Strength") then return 0 end
-	local baseDamage = targetPlayer.leaderstats.Strength.Value * 0.0666666666667
+	if not targetPlayer:FindFirstChild("leaderstats") or not targetPlayer.leaderstats:FindFirstChild("Strength") then return 0 end
+	local baseDamage = targetPlayer.leaderstats.Strength.Value * 0.066666666666666666666666666666666666666666666667
 	local totalMultiplier = 1
-	if targetPlayer:FindFirstChild("ultimatesFolder")
-		and targetPlayer.ultimatesFolder:FindFirstChild("Demon Damage") then
-		totalMultiplier += 0.1 * (targetPlayer.ultimatesFolder["Demon Damage"].Value or 0)
+	if targetPlayer:FindFirstChild("ultimatesFolder") and targetPlayer.ultimatesFolder:FindFirstChild("Demon Damage") then
+		totalMultiplier = totalMultiplier + 0.1 * (targetPlayer.ultimatesFolder["Demon Damage"].Value or 0)
 	end
 	if targetPlayer:FindFirstChild("equippedPets") then
 		for _, petValue in ipairs(targetPlayer.equippedPets:GetChildren()) do
 			if petValue:IsA("ObjectValue") and petValue.Value then
-				local name = string.lower(petValue.Value.Name)
-				if name:match("wild") and name:match("wizard") then
-					totalMultiplier += 0.5
+				if string.lower(petValue.Value.Name):match("wild") and string.lower(petValue.Value.Name):match("wizard") then
+					totalMultiplier = totalMultiplier + 0.5
 				end
-				if name:match("chaos") and name:match("sorcerer") then
-					totalMultiplier += 0.25
+				if string.lower(petValue.Value.Name):match("chaos") and string.lower(petValue.Value.Name):match("sorcerer") then
+					totalMultiplier = totalMultiplier + 0.25
 				end
 			end
 		end
@@ -1425,38 +1336,25 @@ local function calculatePlayerDamage(targetPlayer)
 end
 
 local function updateAdvancedStats(targetPlayer)
-	if not targetPlayer then return end
+	if not targetPlayer then
+		AdvancedStats.HealthLabel.Text = "Enemy Health: N/A"
+		AdvancedStats.EnemyDamageLabel.Text = "Enemy Damage: N/A"
+		AdvancedStats.PlayerHealthLabel.Text = "Your Health: N/A"
+		AdvancedStats.PlayerDamageLabel.Text = "Your Damage: N/A"
+		AdvancedStats.HitsToKillLabel.Text = "Hits to Kill: N/A"
+		return
+	end
 	StatsCache.health = calculatePlayerHealth(targetPlayer)
 	StatsCache.enemyDamage = calculatePlayerDamage(targetPlayer)
 	StatsCache.playerHealth = calculatePlayerHealth(PlayerData.Player)
 	StatsCache.playerDamage = calculatePlayerDamage(PlayerData.Player)
-	StatsCache.hitsToKill =
-		StatsCache.playerDamage <= 0 and "∞"
-		or (math.ceil(StatsCache.health / StatsCache.playerDamage) > 200 and "∞"
-		or (math.ceil(StatsCache.health / StatsCache.playerDamage) < 1 and "instant"
-		or math.ceil(StatsCache.health / StatsCache.playerDamage)))
-	AdvancedStats.HealthLabel.Text =
-		string.format("Enemy Health: %s (%s)",
-			Utils.formatNumber(StatsCache.health),
-			Utils.formatWithCommas(StatsCache.health)
-		)
-	AdvancedStats.EnemyDamageLabel.Text =
-		string.format("Enemy Damage: %s (%s)",
-			Utils.formatNumber(StatsCache.enemyDamage),
-			Utils.formatWithCommas(StatsCache.enemyDamage)
-		)
-	AdvancedStats.PlayerHealthLabel.Text =
-		string.format("Your Health: %s (%s)",
-			Utils.formatNumber(StatsCache.playerHealth),
-			Utils.formatWithCommas(StatsCache.playerHealth)
-		)
-	AdvancedStats.PlayerDamageLabel.Text =
-		string.format("Your Damage: %s (%s)",
-			Utils.formatNumber(StatsCache.playerDamage),
-			Utils.formatWithCommas(StatsCache.playerDamage)
-		)
-	AdvancedStats.HitsToKillLabel.Text =
-		string.format("Hits to Kill: %s", tostring(StatsCache.hitsToKill))
+	StatsCache.hitsToKill = StatsCache.playerDamage <= 0 and "∞" or (math.ceil(StatsCache.health / StatsCache.playerDamage) > 200 and "∞" or 
+		(math.ceil(StatsCache.health / StatsCache.playerDamage) < 1 and "instant" or math.ceil(StatsCache.health / StatsCache.playerDamage)))
+	AdvancedStats.HealthLabel.Text = string.format("Enemy Health: %s (%s)", Utils.formatNumber(StatsCache.health), Utils.formatWithCommas(StatsCache.health))
+	AdvancedStats.EnemyDamageLabel.Text = string.format("Enemy Damage: %s (%s)", Utils.formatNumber(StatsCache.enemyDamage), Utils.formatWithCommas(StatsCache.enemyDamage))
+	AdvancedStats.PlayerHealthLabel.Text = string.format("Your Health: %s (%s)", Utils.formatNumber(StatsCache.playerHealth), Utils.formatWithCommas(StatsCache.playerHealth))
+	AdvancedStats.PlayerDamageLabel.Text = string.format("Your Damage: %s (%s)", Utils.formatNumber(StatsCache.playerDamage), Utils.formatWithCommas(StatsCache.playerDamage))
+	AdvancedStats.HitsToKillLabel.Text = string.format("Hits to Kill: %s", tostring(StatsCache.hitsToKill))
 end
 
 task.spawn(function()
@@ -1468,16 +1366,13 @@ end)
 
 mis = Godmode:AddLabel("Misc:")
 mis.TextColor3 = Color3.fromRGB(255, 255, 255)
-mis.Font = Enum.Font.PermanentMarker
 mis.TextSize = 35
-
 local pa = Godmode:AddLabel("Pack Delay: 0.35s")
 pa.TextColor3 = Color3.fromRGB(255, 165, 0)
 pa.Font = Enum.Font.PermanentMarker
 pa.TextSize = 20
 
 local equipEvent = ReplicatedStorage.rEvents.equipPetEvent
-
 local min = math.min
 local pcall = pcall
 
@@ -1549,7 +1444,7 @@ local function runLoop()
 	end)
 end
 
-local se = Godmode:AddDropdown("Select Delay", function(text)
+local sel = Godmode:AddDropdown("Select Delay", function(text)
 	if text == "0.7s" then
 		spamDelay = 0.7
 	elseif text == "0.35s" then
@@ -1559,14 +1454,13 @@ local se = Godmode:AddDropdown("Select Delay", function(text)
 	elseif text == "0.0875s" then
 		spamDelay = 0.0875
 	end
-
 	pa.Text = "Pack Delay: " .. text
 end)
 
-se:Add("0.7s")
-se:Add("0.35s")
-se:Add("0.175s")
-se:Add("0.0875s")
+sel:Add("0.7s")
+sel:Add("0.35s")
+sel:Add("0.175s")
+sel:Add("0.0875s")
 
 Godmode:AddSwitch("Pack Spam", function(enabled)
 	if active == enabled then return end
@@ -1581,7 +1475,6 @@ end)
 
 local rEvents = ReplicatedStorage:WaitForChild("rEvents", 5)
 local equipPetEvent = rEvents and rEvents:WaitForChild("equipPetEvent", 5)
-
 local petsFolder = player:WaitForChild("petsFolder", 10)
 local uniqueFolder = petsFolder and petsFolder:WaitForChild("Unique", 10)
 local mightyMonsters = {}
@@ -1678,7 +1571,6 @@ local GymLocations = {
 }
 
 local isGymTeleportEnabled = false
-
 local gymLocationCount = #GymLocations
 local localPlayer = PlayerData.Player
 local stepWait = task.wait
@@ -1708,7 +1600,6 @@ Godmode:AddSwitch("Gym Teleport", function(enabled)
 end)
 
 local autoTeleportEnabled = false
-
 local humanoidRootPart
 local targetPositionCFrame = CFrame.new(-8, 0, -1000)
 
@@ -1740,14 +1631,11 @@ for _, size in ipairs({1, 2, 15, 30}) do
     end)
 end
 
-Godmode:AddLabel("———————————————————————————————")
+Godmode:AddLabel("-------------------------------------")
 go = Godmode:AddLabel("Godmode Kill:")
-go.TextColor3 = Color3.fromRGB(255, 255, 255)
-go.Font = Enum.Font.PermanentMarker
 go.TextSize = 35
 
 local brawlRemote = ReplicatedStorage.rEvents.brawlEvent
-
 local brawlModeEnabled = false
 
 Godmode:AddSwitch("Brawl Mode", function(state)
@@ -1763,10 +1651,8 @@ Godmode:AddSwitch("Brawl Mode", function(state)
 end)
 
 local isBrawlEnabled = false
-
 local isFollowing = false
 local currentTargetName = nil
-
 local playerLookup = {}
 
 local function formatPlayerLabel(player)
@@ -1794,26 +1680,26 @@ local function moveBehindTarget(targetPlayer)
     end
 end
 
-local sel = Godmode:AddDropdown("Select Player", function(selectedLabel)
+local sele = Godmode:AddDropdown("Select Player", function(selectedLabel)
     local selectedPlayer = playerLookup[selectedLabel]
     if selectedPlayer then
         currentTargetName = selectedPlayer.Name
         isFollowing = true
-        print("Now following:", selectedPlayer.Name)
+        print(".:", selectedPlayer.Name)
         moveBehindTarget(selectedPlayer)
     end
 end)
 
 updatePlayerLookup()
 for label in pairs(playerLookup) do
-    sel:Add(label)
+    sele:Add(label)
 end
 
 local function refreshDropdown()
-    sel:Clear()
+    sele:Clear()
     updatePlayerLookup()
     for label in pairs(playerLookup) do
-        sel:Add(label)
+        sele:Add(label)
     end
 end
 
@@ -1834,7 +1720,7 @@ end)
 Godmode:AddButton("Stop Following", function()
     isFollowing = false
     currentTargetName = nil
-    print("Stopped following")
+    print(".")
 end)
 
 task.spawn(function()
@@ -1861,7 +1747,7 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
-Godmode:AddSwitch("Brawl Mode [Auto Slam]", function(enabled)
+Godmode:AddSwitch("Brawl Mode (Auto Slam)", function(enabled)
     isBrawlEnabled = enabled
     if enabled then
         task.spawn(function()
@@ -1920,7 +1806,6 @@ Godmode:AddSwitch("Auto Slam", function(state)
 end)
 
 local isBrawlEnabled = false
-
 local autoStompEnabled = false
 
 Godmode:AddSwitch("Auto Stomp", function(state)
@@ -1950,11 +1835,26 @@ Godmode:AddSwitch("Auto Stomp", function(state)
     end
 end)
 
-local inventoryLabel = Inventory:AddLabel("Inventory:")
+local inv = Inventory:AddLabel("Inventory:")
+inv.TextSize = 35
 
-inventoryLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-inventoryLabel.Font = Enum.Font.PermanentMarker
-inventoryLabel.TextSize = 35
+local eggy = {
+	eggs = Inventory:AddLabel("Eggs: 0"),
+	selectedPlayer = nil,
+	eggAmount = 0,
+}
+
+eggy.eggs.TextColor3 = Color3.fromRGB(255, 165, 0)
+eggy.eggs.TextSize = 20
+
+local sha = {
+	shakeCountLabel = Inventory:AddLabel("Tropical Shakes: 0"),
+	selectedPlayer = nil,
+	shakeAmount = 0,
+}
+
+sha.shakeCountLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
+sha.shakeCountLabel.TextSize = 20
 
 local eggEaterState = { running = false }
 
@@ -2020,27 +1920,14 @@ Inventory:AddSwitch("Eat Everything Except Eggs", function(state)
 	boostState.running = state
 end)
 
-Inventory:AddLabel("———————————————————————————————")
-
-local eggGiftingLabel = Inventory:AddLabel("Egg Gifting:")
-
-eggGiftingLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-eggGiftingLabel.Font = Enum.Font.PermanentMarker
-eggGiftingLabel.TextSize = 35
-
-local eggGifterState = {
-	eggCountLabel = Inventory:AddLabel("Eggs: 0"),
-	selectedPlayer = nil,
-	eggAmount = 0,
-}
-
-eggGifterState.eggCountLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
-eggGifterState.eggCountLabel.Font = Enum.Font.PermanentMarker
-eggGifterState.eggCountLabel.TextSize = 25
+Inventory:AddLabel("-------------------------------------")
+local eg = Inventory:AddLabel("Egg Gifting:")
+eg.TextColor3 = Color3.fromRGB(255, 0, 0)
+eg.TextSize = 35
 
 local eggPlayerDropdown = Inventory:AddDropdown("Choose Player", function(name)
 	local username = name:match(" | (.+)") or name
-	eggGifterState.selectedPlayer = Services.Players:FindFirstChild(username)
+	eggy.selectedPlayer = Services.Players:FindFirstChild(username)
 end)
 
 for _, player in ipairs(Services.Players:GetPlayers()) do
@@ -2058,27 +1945,25 @@ end)
 Services.Players.PlayerRemoving:Connect(function(player)
 	eggPlayerDropdown:Remove(player.DisplayName .. " | " .. player.Name)
 
-	if eggGifterState.selectedPlayer == player then
-		eggGifterState.selectedPlayer = nil
+	if eggy.selectedPlayer == player then
+		eggy.selectedPlayer = nil
 	end
 end)
 
-local eggAmountInput = Inventory:AddTextBox("Amount:", function(text)
-	eggGifterState.eggAmount = tonumber(text)
+local am = Inventory:AddTextBox("Amount:", function(text)
+	eggy.eggAmount = tonumber(text)
 end)
 
-eggAmountInput.Font = Enum.Font.PermanentMarker
-
 Inventory:AddButton("Start Gifting", function()
-	if eggGifterState.selectedPlayer and eggGifterState.eggAmount and eggGifterState.eggAmount > 0 then
+	if eggy.selectedPlayer and eggy.eggAmount and eggy.eggAmount > 0 then
 		local egg =
 			Services.Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
 		if egg then
-			for _ = 1, eggGifterState.eggAmount do
+			for _ = 1, eggy.eggAmount do
 				pcall(function()
 					Services.ReplicatedStorage.rEvents.giftRemote:InvokeServer(
 						"giftRequest",
-						eggGifterState.selectedPlayer,
+						eggy.selectedPlayer,
 						egg
 					)
 				end)
@@ -2088,27 +1973,14 @@ Inventory:AddButton("Start Gifting", function()
 	end
 end)
 
-Inventory:AddLabel("———————————————————————————————")
-
-local shakeGiftingLabel = Inventory:AddLabel("Shake Gifting:")
-
-shakeGiftingLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-shakeGiftingLabel.Font = Enum.Font.PermanentMarker
-shakeGiftingLabel.TextSize = 35
-
-local shakeGifterState = {
-	shakeCountLabel = Inventory:AddLabel("Tropical Shakes: 0"),
-	selectedPlayer = nil,
-	shakeAmount = 0,
-}
-
-shakeGifterState.shakeCountLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
-shakeGifterState.shakeCountLabel.Font = Enum.Font.PermanentMarker
-shakeGifterState.shakeCountLabel.TextSize = 25
+Inventory:AddLabel("-------------------------------------")
+local sh = Inventory:AddLabel("Shake Gifting:")
+sh.TextColor3 = Color3.fromRGB(255, 0, 0)
+sh.TextSize = 35
 
 local shakePlayerDropdown = Inventory:AddDropdown("Choose Player", function(name)
 	local username = name:match(" | (.+)") or name
-	shakeGifterState.selectedPlayer = Services.Players:FindFirstChild(username)
+	sha.selectedPlayer = Services.Players:FindFirstChild(username)
 end)
 
 for _, player in ipairs(Services.Players:GetPlayers()) do
@@ -2126,23 +1998,21 @@ end)
 Services.Players.PlayerRemoving:Connect(function(player)
 	shakePlayerDropdown:Remove(player.DisplayName .. " | " .. player.Name)
 
-	if shakeGifterState.selectedPlayer == player then
-		shakeGifterState.selectedPlayer = nil
+	if sha.selectedPlayer == player then
+		sha.selectedPlayer = nil
 	end
 end)
 
 local shakeAmountInput = Inventory:AddTextBox("Amount:", function(text)
-	shakeGifterState.shakeAmount = tonumber(text)
+	sha.shakeAmount = tonumber(text)
 end)
 
-shakeAmountInput.Font = Enum.Font.PermanentMarker
-
 Inventory:AddButton("Start Gifting", function()
-	if shakeGifterState.selectedPlayer and shakeGifterState.shakeAmount and shakeGifterState.shakeAmount > 0 then
-		for _ = 1, shakeGifterState.shakeAmount do
+	if sha.selectedPlayer and sha.shakeAmount and sha.shakeAmount > 0 then
+		for _ = 1, sha.shakeAmount do
 			Services.ReplicatedStorage.rEvents.giftRemote:InvokeServer(
 				"giftRequest",
-				shakeGifterState.selectedPlayer,
+				sha.selectedPlayer,
 				Services.Players.LocalPlayer.consumablesFolder:FindFirstChild("Tropical Shake")
 			)
 		end
@@ -2162,8 +2032,8 @@ task.spawn(function()
 				end
 			end
 		end
-		eggGifterState.eggCountLabel.Text = "Protein Eggs: " .. eggCount
-		shakeGifterState.shakeCountLabel.Text = "Tropical Shakes: " .. shakeCount
+		eggy.eggCountLabel.Text = "Protein Eggs: " .. eggCount
+		sha.shakeCountLabel.Text = "Tropical Shakes: " .. shakeCount
 		task.wait(7.5)
 	end
 end)
