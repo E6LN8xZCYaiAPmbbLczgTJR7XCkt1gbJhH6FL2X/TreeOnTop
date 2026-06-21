@@ -245,6 +245,61 @@ local function killPlayer(target)
 	getTool()
 end
 
+_G.blacklistedPlayers = _G.blacklistedPlayers or {}
+local recentHitters = {}
+
+local function addToBlacklist(player)
+	if not player or player == lp then return end
+	if table.find(_G.blacklistedPlayers, player.Name) then return end
+	table.insert(_G.blacklistedPlayers, player.Name)
+	print(".", player.Name)
+end
+
+local function trackTouchHits(char)
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	hrp.Touched:Connect(function(hit)
+		local model = hit:FindFirstAncestorOfClass("Model")
+		if not model then return end
+		local player = Players:GetPlayerFromCharacter(model)
+		if not player or player == lp then return end
+		recentHitters[player] = os.clock()
+	end)
+end
+
+local function trackDamage(char)
+	local hum = char:WaitForChild("Humanoid")
+	local lastHealth = hum.Health
+	hum.HealthChanged:Connect(function(newHealth)
+		if newHealth < lastHealth then
+			local attacker, latestTime = nil, 0
+			for player, t in pairs(recentHitters) do
+				if os.clock() - t < 1.5 then
+					if t > latestTime then
+						latestTime = t
+						attacker = player
+					end
+				end
+			end
+			if attacker then
+				addToBlacklist(attacker)
+			end
+		end
+		lastHealth = newHealth
+	end)
+end
+
+local function setupCharacter(char)
+	trackTouchHits(char)
+	trackDamage(char)
+end
+
+if lp.Character then
+	setupCharacter(lp.Character)
+end
+
+lp.CharacterAdded:Connect(setupCharacter)
+
 mi = Killing:AddLabel("Miscellaneous:")
 mi.TextSize = 35
 
