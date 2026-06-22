@@ -61,10 +61,6 @@ local Tabs = {
 
 Tabs.Killing:Show()
 
-Tabs.Main:AddButton("Load Anti Lag", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/juywvm/-Roblox-Projects-/main/____Anti_Afk_Remastered_______"))()
-end)
-
 local Protection = {
 	AntiFling = {Enabled = false},
 }
