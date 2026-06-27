@@ -2,6 +2,7 @@ local ui_options = {
 	main_color = Color3.fromRGB(0, 0, 0),
 	min_size = Vector2.new(500, 600),
 	toggle_key = Enum.KeyCode.RightShift,
+	background_image = "rbxassetid://2851926732"
 }
 do
 	local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
@@ -105,7 +106,11 @@ Window.ClipsDescendants = true
 Window.Position = UDim2.new(0, 20, 0, 20)
 Window.Selectable = true
 Window.Size = UDim2.new(0, 200, 0, 200)
-Window.Image = "rbxassetid://113785841017539"
+Window.Image = options.background_image or "rbxassetid://2851926732"
+Window.Image = options.background_image or "rbxassetid://2851926732"
+Window.ImageTransparency = 0
+Window.ScaleType = Enum.ScaleType.Stretch
+Window.ZIndex = Window.ZIndex + (windows * 10)
 Window.ImageColor3 = Color3.new(1, 1, 1)
 Window.ScaleType = Enum.ScaleType.Stretch
 Resizer.Name = "Resizer"
@@ -130,7 +135,7 @@ Toggle.Position = UDim2.new(0, 5, 0, -2)
 Toggle.Rotation = 90
 Toggle.Size = UDim2.new(0, 20, 0, 20)
 Toggle.ZIndex = 2
-Toggle.Image = "https://www.roblox.com/Thumbs/Asset.ashx?width=420&height=420&assetId=113785841017539"
+Toggle.Image = "https://www.roblox.com/Thumbs/Asset.ashx?width=420&height=420&assetId=98003173280742"
 Base.Name = "Base"
 Base.Parent = Bar
 Base.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431)
