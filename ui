@@ -2,7 +2,6 @@ local ui_options = {
 	main_color = Color3.fromRGB(0, 0, 0),
 	min_size = Vector2.new(500, 600),
 	toggle_key = Enum.KeyCode.RightShift,
-	background_image = "rbxassetid://2851926732"
 }
 do
 	local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
@@ -106,13 +105,10 @@ Window.ClipsDescendants = true
 Window.Position = UDim2.new(0, 20, 0, 20)
 Window.Selectable = true
 Window.Size = UDim2.new(0, 200, 0, 200)
-Window.Image = options.background_image or "rbxassetid://2851926732"
-Window.Image = options.background_image or "rbxassetid://2851926732"
-Window.ImageTransparency = 0
-Window.ScaleType = Enum.ScaleType.Stretch
-Window.ZIndex = Window.ZIndex + (windows * 10)
-Window.ImageColor3 = Color3.new(1, 1, 1)
-Window.ScaleType = Enum.ScaleType.Stretch
+Window.Image = "rbxassetid://2851926732"
+Window.ImageColor3 = Color3.new(0.0823529, 0.0862745, 0.0901961)
+Window.ScaleType = Enum.ScaleType.Slice
+Window.SliceCenter = Rect.new(12, 12, 12, 12)
 Resizer.Name = "Resizer"
 Resizer.Parent = Window
 Resizer.Active = true
