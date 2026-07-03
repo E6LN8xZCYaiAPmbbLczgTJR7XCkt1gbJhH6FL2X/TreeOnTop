@@ -1,6 +1,6 @@
 local ui_options = {
 	main_color = Color3.fromRGB(0, 0, 0),
-	min_size = Vector2.new(500, 750),
+	min_size = Vector2.new(450, 600),
 	toggle_key = Enum.KeyCode.RightShift,
 }
 do
@@ -270,7 +270,7 @@ TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
 TextLabel.BackgroundTransparency = 1
 TextLabel.Position = UDim2.new(1, -20, -0.75, 0)
 TextLabel.Size = UDim2.new(0, 26, 0, 50)
-TextLabel.Font = Enum.Font.PermanmentMarker
+TextLabel.Font = Enum.Font.Gotham
 TextLabel.Text = "]"
 TextLabel.TextColor3 = Color3.new(0.627451, 0.627451, 0.627451)
 TextLabel.TextSize = 17
