@@ -883,7 +883,7 @@ local function gMouse()
 end
 
 local function ripple(button, x, y)
-	spawn(function()
+	task.spawn(function()
 		button.ClipsDescendants = true
 
 		local circle = prefabs:FindFirstChild("Circle"):Clone()
@@ -907,7 +907,7 @@ local function ripple(button, x, y)
 		circle:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, -size / 2, 0.5, -size / 2), "Out", "Quad", 0.5, false, nil)
 		Resize(circle, {ImageTransparency = 1}, 0.5)
 
-		wait(0.5)
+		task.wait(0.5)
 		circle:Destroy()
 	end)
 end
@@ -950,26 +950,17 @@ function library:AddWindow(title, options)
 	Window.Size = UDim2.new(0, options.min_size.X, 0, options.min_size.Y)
 	Window.ZIndex = Window.ZIndex + (windows * 10)
 
-	do -- Altering Window Color
-		local Title = Window:FindFirstChild("Title")
+	do -- Altering Window Color (set once for performance)
 		local Bar = Window:FindFirstChild("Bar")
 		local Base = Bar:FindFirstChild("Base")
 		local Top = Bar:FindFirstChild("Top")
 		local SplitFrame = Window:FindFirstChild("TabSelection"):FindFirstChild("Frame")
-		local Toggle = Bar:FindFirstChild("Toggle")
 
-		spawn(function()
-			while true do
-				Bar.BackgroundColor3 = options.main_color
-				Base.BackgroundColor3 = options.main_color
-				Base.ImageColor3 = options.main_color
-				Top.ImageColor3 = options.main_color
-				SplitFrame.BackgroundColor3 = options.main_color
-
-				RS.Heartbeat:Wait()
-			end
-		end)
-
+		Bar.BackgroundColor3 = options.main_color
+		Base.BackgroundColor3 = options.main_color
+		Base.ImageColor3 = options.main_color
+		Top.ImageColor3 = options.main_color
+		SplitFrame.BackgroundColor3 = options.main_color
 	end
 
 	local Resizer = Window:WaitForChild("Resizer")
@@ -999,34 +990,33 @@ function library:AddWindow(title, options)
 
 		local Held = false
 		UIS.InputBegan:Connect(function(inputObject)
-			if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
+			if inputObject.UserInputType == Enum.UserInputType.MouseButton1 and Entered and Resizer.Active and options.can_resize then
 				Held = true
 
-				spawn(function() -- Loop check
-					if Entered and Resizer.Active and options.can_resize then
-						while Held and Resizer.Active do
+				local conn
+				conn = RS.Heartbeat:Connect(function()
+					if not Held or not Resizer.Active then
+						conn:Disconnect()
+						return
+					end
 
-							local mouse_location = gMouse()
-							local x = mouse_location.X - Window.AbsolutePosition.X
-							local y = mouse_location.Y - Window.AbsolutePosition.Y
+					local mouse_location = gMouse()
+					local x = mouse_location.X - Window.AbsolutePosition.X
+					local y = mouse_location.Y - Window.AbsolutePosition.Y
 
-							--
-							if x >= options.min_size.X and y >= options.min_size.Y then
-								Resize(Window, {Size = UDim2.new(0, x, 0, y)}, options.tween_time)
-							elseif x >= options.min_size.X then
-								Resize(Window, {Size = UDim2.new(0, x, 0, options.min_size.Y)}, options.tween_time)
-							elseif y >= options.min_size.Y then
-								Resize(Window, {Size = UDim2.new(0, options.min_size.X, 0, y)}, options.tween_time)
-							else
-								Resize(Window, {Size = UDim2.new(0, options.min_size.X, 0, options.min_size.Y)}, options.tween_time)
-							end
-
-							RS.Heartbeat:Wait()
-						end
+					if x >= options.min_size.X and y >= options.min_size.Y then
+						Resize(Window, {Size = UDim2.new(0, x, 0, y)}, options.tween_time)
+					elseif x >= options.min_size.X then
+						Resize(Window, {Size = UDim2.new(0, x, 0, options.min_size.Y)}, options.tween_time)
+					elseif y >= options.min_size.Y then
+						Resize(Window, {Size = UDim2.new(0, options.min_size.X, 0, y)}, options.tween_time)
+					else
+						Resize(Window, {Size = UDim2.new(0, options.min_size.X, 0, options.min_size.Y)}, options.tween_time)
 					end
 				end)
 			end
 		end)
+
 		UIS.InputEnded:Connect(function(inputObject)
 			if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 				Held = false
@@ -1157,15 +1147,7 @@ function library:AddWindow(title, options)
 						button.Size = UDim2.new(0, gNameLen(button), 0, 20)
 						button.ZIndex = button.ZIndex + (windows * 10)
 						button:GetChildren()[1].ZIndex = button:GetChildren()[1].ZIndex + (windows * 10)
-
-						spawn(function()
-							while true do
-								if button and button:GetChildren()[1] then
-									button:GetChildren()[1].ImageColor3 = options.main_color
-								end
-								RS.Heartbeat:Wait()
-							end
-						end)
+						button:GetChildren()[1].ImageColor3 = options.main_color
 
 						button.MouseButton1Click:Connect(function()
 							ripple(button, mouse.X, mouse.Y)
@@ -1189,15 +1171,7 @@ function library:AddWindow(title, options)
 						switch:FindFirstChild("Title").ZIndex = switch:FindFirstChild("Title").ZIndex + (windows * 10)
 						switch.ZIndex = switch.ZIndex + (windows * 10)
 						switch:GetChildren()[1].ZIndex = switch:GetChildren()[1].ZIndex + (windows * 10)
-
-						spawn(function()
-							while true do
-								if switch and switch:GetChildren()[1] then
-									switch:GetChildren()[1].ImageColor3 = options.main_color
-								end
-								RS.Heartbeat:Wait()
-							end
-						end)
+						switch:GetChildren()[1].ImageColor3 = options.main_color
 
 						local toggled = false
 						switch.MouseButton1Click:Connect(function()
@@ -1283,45 +1257,46 @@ function library:AddWindow(title, options)
 
 							local Held = false
 							UIS.InputBegan:Connect(function(inputObject)
-								if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
+								if inputObject.UserInputType == Enum.UserInputType.MouseButton1 and Entered and not slider_options.readonly then
 									Held = true
 
-									spawn(function() -- Loop check
-										if Entered and not slider_options.readonly then
-											while Held and (not dropdown_open) do
-												local mouse_location = gMouse()
-												local x = (slider.AbsoluteSize.X - (slider.AbsoluteSize.X - ((mouse_location.X - slider.AbsolutePosition.X)) + 1)) / slider.AbsoluteSize.X
-
-												local min = 0
-												local max = 1
-
-												local size = min
-												if x >= min and x <= max then
-													size = x
-												elseif x < min then
-													size = min
-												elseif x > max then
-													size = max
-												end
-
-												Resize(indicator, {Size = UDim2.new(size or min, 0, 0, 20)}, options.tween_time)
-												local p = math.floor((size or min) * 100)
-
-												local maxv = slider_options.max
-												local minv = slider_options.min
-												local diff = maxv - minv
-
-												local sel_value = math.floor(((diff / 100) * p) + minv)
-
-												value.Text = tostring(sel_value)
-												pcall(callback, sel_value)
-
-												RS.Heartbeat:Wait()
-											end
+									local conn
+									conn = RS.Heartbeat:Connect(function()
+										if not Held or dropdown_open then
+											conn:Disconnect()
+											return
 										end
+
+										local mouse_location = gMouse()
+										local x = (slider.AbsoluteSize.X - (slider.AbsoluteSize.X - ((mouse_location.X - slider.AbsolutePosition.X)) + 1)) / slider.AbsoluteSize.X
+
+										local min = 0
+										local max = 1
+
+										local size = min
+										if x >= min and x <= max then
+											size = x
+										elseif x < min then
+											size = min
+										elseif x > max then
+											size = max
+										end
+
+										Resize(indicator, {Size = UDim2.new(size or min, 0, 0, 20)}, options.tween_time)
+										local p = math.floor((size or min) * 100)
+
+										local maxv = slider_options.max
+										local minv = slider_options.min
+										local diff = maxv - minv
+
+										local sel_value = math.floor(((diff / 100) * p) + minv)
+
+										value.Text = tostring(sel_value)
+										pcall(callback, sel_value)
 									end)
 								end
 							end)
+
 							UIS.InputEnded:Connect(function(inputObject)
 								if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 									Held = false
@@ -1392,8 +1367,7 @@ function library:AddWindow(title, options)
 
 						UIS.InputBegan:Connect(function(a, b)
 							if checks.binding then
-								spawn(function()
-									wait()
+								task.delay(0, function()
 									checks.binding = false
 								end)
 								return
@@ -1567,10 +1541,16 @@ local object = prefabs:FindFirstChild("DropdownButton"):Clone()
 								if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 									Held = true
 
-									spawn(function() -- Loop check
-										while Held and Entered1 and (not dropdown_open) do -- Palette
-											local mouse_location = gMouse()
+									local conn
+									conn = RS.Heartbeat:Connect(function()
+										if not Held or dropdown_open then
+											conn:Disconnect()
+											return
+										end
 
+										local mouse_location = gMouse()
+
+										if Entered1 then -- Palette
 											local x = ((palette.AbsoluteSize.X - (mouse_location.X - palette.AbsolutePosition.X)) + 1)
 											local y = ((palette.AbsoluteSize.Y - (mouse_location.Y - palette.AbsolutePosition.Y)) + 1.5)
 
@@ -1579,24 +1559,18 @@ local object = prefabs:FindFirstChild("DropdownButton"):Clone()
 											s = y / 100
 
 											Resize(palette_indicator, {Position = UDim2.new(0, math.abs(x - 100) - (palette_indicator.AbsoluteSize.X / 2), 0, math.abs(y - 100) - (palette_indicator.AbsoluteSize.Y / 2))}, options.tween_time)
-
 											update()
-											RS.Heartbeat:Wait()
-										end
-
-										while Held and Entered2 and (not dropdown_open) do -- Saturation
-											local mouse_location = gMouse()
+										elseif Entered2 then -- Saturation
 											local y = ((palette.AbsoluteSize.Y - (mouse_location.Y - palette.AbsolutePosition.Y)) + 1.5)
 											v = y / 100
 
 											Resize(saturation_indicator, {Position = UDim2.new(0, 0, 0, math.abs(y - 100))}, options.tween_time)
-
 											update()
-											RS.Heartbeat:Wait()
 										end
 									end)
 								end
 							end)
+
 							UIS.InputEnded:Connect(function(inputObject)
 								if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 									Held = false
@@ -1757,7 +1731,23 @@ local object = prefabs:FindFirstChild("DropdownButton"):Clone()
 							end
 
 							highlight_lua()
-							Source.Changed:Connect(highlight_lua)
+
+							-- Debounced for smoothness (prevents lag when typing long scripts)
+							local lastHighlight = 0
+							Source.Changed:Connect(function()
+								local now = tick()
+								if now - lastHighlight > 0.033 then
+									lastHighlight = now
+									highlight_lua()
+								else
+									task.delay(0.05, function()
+										if tick() - lastHighlight > 0.033 then
+											lastHighlight = tick()
+											highlight_lua()
+										end
+									end)
+								end
+							end)
 
 							function console_data:Set(code)
 								Source.Text = tostring(code)
@@ -1816,15 +1806,7 @@ local object = prefabs:FindFirstChild("DropdownButton"):Clone()
 
 						folder.Parent = new_tab
 						button.Text = "      " .. folder_name
-
-						spawn(function()
-							while true do
-								if button and button:GetChildren()[1] then
-									button:GetChildren()[1].ImageColor3 = options.main_color
-								end
-								RS.Heartbeat:Wait()
-							end
-						end)
+						button:GetChildren()[1].ImageColor3 = options.main_color
 
 						local function gFolderLen()
 							local n = 25
@@ -1838,21 +1820,15 @@ local object = prefabs:FindFirstChild("DropdownButton"):Clone()
 
 						local open = false
 						button.MouseButton1Click:Connect(function()
-							if open then -- Close
-								Resize(toggle, {Rotation = 0}, options.tween_time)
-								objects.Visible = false
-							else -- Open
+							open = not open
+							if open then -- Open
 								Resize(toggle, {Rotation = 90}, options.tween_time)
 								objects.Visible = true
-							end
-
-							open = not open
-						end)
-
-						spawn(function()
-							while true do
-								Resize(folder, {Size = UDim2.new(1, 0, 0, (open and gFolderLen() or 20))}, options.tween_time)
-								wait()
+								Resize(folder, {Size = UDim2.new(1, 0, 0, gFolderLen())}, options.tween_time)
+							else -- Close
+								Resize(toggle, {Rotation = 0}, options.tween_time)
+								objects.Visible = false
+								Resize(folder, {Size = UDim2.new(1, 0, 0, 20)}, options.tween_time)
 							end
 						end)
 
