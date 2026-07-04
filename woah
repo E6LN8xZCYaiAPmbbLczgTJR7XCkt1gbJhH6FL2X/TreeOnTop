@@ -170,8 +170,8 @@ tabs.Name = "Tabs"
 tabs.Parent = window
 tabs.BackgroundColor3 = Color3.new(1, 1, 1)
 tabs.BackgroundTransparency = 1
-tabs.Position = UDim2.new(0, 15, 0, 60)
-tabs.Size = UDim2.new(1, -30, 1, -60)
+tabs.Position = UDim2.new(0, 160, 0, 30)
+tabs.Size = UDim2.new(1, -175, 1, -50)
 
 titleLabel.Name = "Title"
 titleLabel.Parent = window
@@ -190,7 +190,7 @@ tabSelection.Parent = window
 tabSelection.BackgroundColor3 = Color3.new(1, 1, 1)
 tabSelection.BackgroundTransparency = 1
 tabSelection.Position = UDim2.new(0, 15, 0, 30)
-tabSelection.Size = UDim2.new(1, -30, 0, 25)
+tabSelection.Size = UDim2.new(0, 140, 1, -50)
 tabSelection.Visible = false
 tabSelection.Image = "rbxassetid://2851929490"
 tabSelection.ImageColor3 = Color3.new(0.145098, 0.14902, 0.156863)
@@ -204,7 +204,7 @@ tabButtons.BackgroundTransparency = 1
 tabButtons.Size = UDim2.new(1, 0, 1, 0)
 
 uiListLayout.Parent = tabButtons
-uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+uiListLayout.FillDirection = Enum.FillDirection.Vertical
 uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 uiListLayout.Padding = UDim.new(0, 2)
 
@@ -212,8 +212,8 @@ frame.Parent = tabSelection
 frame.BackgroundColor3 = Color3.new(0.12549, 0.227451, 0.372549)
 frame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
 frame.BorderSizePixel = 0
-frame.Position = UDim2.new(0, 0, 1, 0)
-frame.Size = UDim2.new(1, 0, 0, 2)
+frame.Position = UDim2.new(1, -2, 0, 0)
+frame.Size = UDim2.new(0, 2, 1, 0)
 
 tab.Name = "Tab"
 tab.Parent = prefabs
@@ -1087,8 +1087,9 @@ function library:AddWindow(title, options)
 
 				local new_button = prefabs:FindFirstChild("TabButton"):Clone()
 				new_button.Parent = tab_buttons
-				new_button.Text = tab_name
-				new_button.Size = UDim2.new(0, gNameLen(new_button), 0, 20)
+				new_button.Text = "  " .. tab_name
+				new_button.Size = UDim2.new(1, 0, 0, 20)
+				new_button.TextXAlignment = Enum.TextXAlignment.Left
 				new_button.ZIndex = new_button.ZIndex + (windows * 10)
 				new_button:GetChildren()[1].ZIndex = new_button:GetChildren()[1].ZIndex + (windows * 10)
 
