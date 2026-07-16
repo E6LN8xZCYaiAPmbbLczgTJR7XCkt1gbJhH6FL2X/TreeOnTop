@@ -1,0 +1,745 @@
+local Services = {
+	Players = game:GetService("Players"),
+	ReplicatedStorage = game:GetService("ReplicatedStorage"),
+	Workspace = workspace,
+	RunService = game:GetService("RunService")
+}
+
+local PlayerData = {
+	Player = Services.Players.LocalPlayer,
+	DisplayName = Services.Players.LocalPlayer.DisplayName,
+	Character = Services.Players.LocalPlayer.Character,
+	Backpack = Services.Players.LocalPlayer:WaitForChild("Backpack")
+}
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/E6LN8xZCYaiAPmbbLczgTJR7XCkt1gbJhH6FL2X/TreeOnTop/refs/heads/main/UI", true))()
+
+local window = library:AddWindow("Tree's Private Killer", {
+	main_color = Color3.fromRGB(0, 0, 0),
+	min_size = Vector2.new(500, 650)
+})
+
+local Tabs = {
+	Main = window:AddTab("Main"),
+	Killing = window:AddTab("Killing"),
+	Stats = window:AddTab("Stats")
+}
+
+local Protection = {
+	AntiFling = {Enabled = false}
+}
+
+local function cleanupAntiFlingBodyVelocity()
+	if not PlayerData.Player.Character or not PlayerData.Player.Character:FindFirstChild("HumanoidRootPart") then return end
+	local hrp = PlayerData.Player.Character.HumanoidRootPart
+	local bv = hrp:FindFirstChild("BodyVelocity")
+	if bv and bv.MaxForce == Vector3.new(100000, 0, 100000) then
+		bv:Destroy()
+	end
+end
+
+local function eAntiFling()
+	if not Protection.AntiFling.Enabled or not PlayerData.Player.Character then return end
+	if not PlayerData.Player.Character:FindFirstChild("HumanoidRootPart") then return end
+	cleanupAntiFlingBodyVelocity()
+	local bv = Instance.new("BodyVelocity")
+	bv.MaxForce = Vector3.new(100000, 0, 100000)
+	bv.Velocity = Vector3.new(0, 0, 0)
+	bv.P = 1250
+	bv.Parent = PlayerData.Player.Character.HumanoidRootPart
+end
+
+local function dAntiFling()
+	cleanupAntiFlingBodyVelocity()
+end
+
+Tabs.Main:AddSwitch("Anti Fling", function(bool)
+	Protection.AntiFling.Enabled = bool
+	if bool then eAntiFling() else dAntiFling() end
+end)
+
+PlayerData.Player.CharacterAdded:Connect(function(newChar)
+	newChar:WaitForChild("HumanoidRootPart", 5)
+	if Protection.AntiFling.Enabled then eAntiFling() end
+end)
+
+local WalkOnWater = {
+	Enabled = false,
+	Connection = nil,
+	Part = nil
+}
+
+local WaterPart = Instance.new("Part")
+WaterPart.Name = "WalkOnWaterPart"
+WaterPart.Size = Vector3.new(4, 0.1, 4)
+WaterPart.Transparency = 1
+WaterPart.Anchored = true
+WaterPart.CanCollide = false
+WaterPart.CanTouch = false
+WaterPart.CanQuery = false
+WaterPart.Parent = Services.Workspace
+WalkOnWater.Part = WaterPart
+
+local function eWalkOnWater()
+	if not WalkOnWater.Enabled or not PlayerData.Player.Character then return end
+	if WalkOnWater.Connection then
+		WalkOnWater.Connection:Disconnect()
+		WalkOnWater.Connection = nil
+	end
+	WalkOnWater.Part.CanCollide = true
+	WalkOnWater.Connection = Services.RunService.RenderStepped:Connect(function()
+		local character = PlayerData.Player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if root then
+			WalkOnWater.Part.CFrame = CFrame.new(root.Position.X, -9.5, root.Position.Z)
+		end
+	end)
+end
+
+local function dWalkOnWater()
+	if WalkOnWater.Connection then
+		WalkOnWater.Connection:Disconnect()
+		WalkOnWater.Connection = nil
+	end
+	if WalkOnWater.Part then
+		WalkOnWater.Part.CanCollide = false
+		WalkOnWater.Part.Position = Vector3.new(0, -10000, 0)
+	end
+end
+
+Tabs.Main:AddSwitch("Walk On Water", function(bool)
+	WalkOnWater.Enabled = bool
+	if bool then
+		eWalkOnWater()
+	else
+		dWalkOnWater()
+	end
+end)
+
+local function equipPetsByName(petName)
+	for _, folder in pairs(PlayerData.Player.petsFolder:GetChildren()) do
+		if folder:IsA("Folder") then
+			for _, pet in pairs(folder:GetChildren()) do
+				Services.ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+			end
+		end
+	end
+	task.wait(0.02)
+	local petsToEquip = {}
+	for _, pet in pairs(PlayerData.Player.petsFolder.Unique:GetChildren()) do
+		if pet.Name == petName then
+			table.insert(petsToEquip, pet)
+		end
+	end
+	for i = 1, math.min(8, #petsToEquip) do
+		Services.ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", petsToEquip[i])
+		task.wait(0.01)
+	end
+	return petsToEquip
+end
+
+Tabs.Killing:AddButton("Equip DMG Packs", function()
+	equipPetsByName("Wild Wizard")
+end)
+
+Tabs.Killing:AddButton("Equip HP Packs", function()
+	equipPetsByName("Mighty Monster")
+end)
+
+local MightyMonsterSpamEnabled = false
+
+Tabs.Killing:AddSwitch("Mighty Monster Spam", function(state)
+	MightyMonsterSpamEnabled = state
+	if state then
+		task.spawn(function()
+			local petsToEquip = equipPetsByName("Mighty Monster")
+			local equipCount = math.min(8, #petsToEquip)
+			if equipCount == 0 then
+				MightyMonsterSpamEnabled = false
+				return
+			end
+			while MightyMonsterSpamEnabled do
+				for i = 1, equipCount do
+					if not MightyMonsterSpamEnabled then break end
+					local pet = petsToEquip[i]
+					if pet and pet.Parent then
+						Services.ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+						task.wait(0.001)
+						Services.ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
+						task.wait(0.001)
+					end
+				end
+			end
+		end)
+	end
+end)
+
+Tabs.Killing:AddLabel("______________________________________________")
+
+local function isNameInList(list, name)
+	name = tostring(name):lower()
+	for _, entry in ipairs(list) do
+		if entry:lower() == name then return true end
+	end
+	return false
+end
+
+local genv = getgenv()
+genv.blacklistedPlayers = genv.blacklistedPlayers or {}
+genv.tpBlacklistedPlayers = genv.tpBlacklistedPlayers or {}
+genv.watchlistedClans = genv.watchlistedClans or {}
+
+local function isBlacklisted(player)
+	return isNameInList(genv.blacklistedPlayers, player and player.Name)
+end
+
+local function isTeleportBlacklisted(player)
+	return isNameInList(genv.tpBlacklistedPlayers, player and player.Name)
+end
+
+local function isWatchlistedClan(player)
+	if not player then return false end
+	local name = player.Name:lower()
+	local display = player.DisplayName:lower()
+	for _, clan in ipairs(genv.watchlistedClans) do
+		local c = clan:lower()
+		if name:find(c, 1, true) or display:find(c, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+local function populateDropdownWithPlayers(dropdown, excludeSelf)
+	for _, player in ipairs(Services.Players:GetPlayers()) do
+		if not excludeSelf or player ~= PlayerData.Player then
+			dropdown:Add(player.DisplayName .. " | " .. player.Name)
+		end
+	end
+end
+
+local AddToBlacklist = Tabs.Killing:AddDropdown("Add To Blacklist", function(selectedText)
+	local playerName = selectedText:match("| (.+)$")
+	if playerName then
+		playerName = playerName:gsub("^%s*(.-)%s*$", "%1")
+		if not isNameInList(genv.blacklistedPlayers, playerName) then
+			table.insert(genv.blacklistedPlayers, playerName)
+		end
+	end
+end)
+
+local AddToTpList = Tabs.Killing:AddDropdown("Add To TpList", function(selectedText)
+	local playerName = selectedText:match("| (.+)$")
+	if playerName then
+		playerName = playerName:gsub("^%s*(.-)%s*$", "%1")
+		if not isNameInList(genv.tpBlacklistedPlayers, playerName) then
+			table.insert(genv.tpBlacklistedPlayers, playerName)
+		end
+	end
+end)
+
+Tabs.Killing:AddTextBox("Add To Watchlist", function(text)
+	text = tostring(text or ""):match("^%s*(.-)%s*$")
+	if text == "" then return end
+	for _, clan in ipairs(genv.watchlistedClans) do
+		if clan:lower() == text:lower() then return end
+	end
+	table.insert(genv.watchlistedClans, text)
+end)
+
+populateDropdownWithPlayers(AddToBlacklist, true)
+populateDropdownWithPlayers(AddToTpList, true)
+
+Services.Players.PlayerAdded:Connect(function(player)
+	if player ~= PlayerData.Player then
+		AddToBlacklist:Add(player.DisplayName .. " | " .. player.Name)
+		AddToTpList:Add(player.DisplayName .. " | " .. player.Name)
+	end
+	specdropdown:Add(player.DisplayName .. " | " .. player.Name)
+	if player ~= PlayerData.Player then
+		playerDropdown:Add(player.DisplayName .. " | " .. player.Name)
+	end
+end)
+
+local function checkCharacter()
+	if not PlayerData.Player.Character then
+		repeat task.wait() until PlayerData.Player.Character
+	end
+	return PlayerData.Player.Character
+end
+
+local function gettool()
+	for _, v in pairs(PlayerData.Player.Backpack:GetChildren()) do
+		if v.Name == "Punch" and PlayerData.Player.Character:FindFirstChild("Humanoid") then
+			PlayerData.Player.Character.Humanoid:EquipTool(v)
+		end
+	end
+	PlayerData.Player.muscleEvent:FireServer("punch", "leftHand")
+	PlayerData.Player.muscleEvent:FireServer("punch", "rightHand")
+end
+
+local function isPlayerAlive(player)
+	return player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and 
+		player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
+end
+
+local function killPlayer(target)
+	if not isPlayerAlive(target) or not checkCharacter():FindFirstChild("LeftHand") then return end
+	pcall(function()
+		firetouchinterest(target.Character.HumanoidRootPart, checkCharacter().LeftHand, 0)
+		firetouchinterest(target.Character.HumanoidRootPart, checkCharacter().LeftHand, 1)
+		gettool()
+	end)
+end
+
+Tabs.Killing:AddSwitch("Kill", function(bool)
+	genv.killBlacklistedOnly = bool
+	if bool then
+		if not genv.blacklistKillConnection then
+			genv.blacklistKillConnection = Services.RunService.Heartbeat:Connect(function()
+				if genv.killBlacklistedOnly then
+					for _, player in ipairs(Services.Players:GetPlayers()) do
+						if player ~= PlayerData.Player and isBlacklisted(player) then
+							killPlayer(player)
+						end
+					end
+				end
+			end)
+		end
+	else
+		if genv.blacklistKillConnection then
+			genv.blacklistKillConnection:Disconnect()
+			genv.blacklistKillConnection = nil
+		end
+	end
+end)
+
+Tabs.Killing:AddSwitch("Teleport", function(s)
+	genv.killTPBlacklistedOnly = s
+	if genv.killTPConnection then
+		genv.killTPConnection:Disconnect()
+		genv.killTPConnection = nil
+	end
+	if not s then return end
+	genv.killTPConnection = Services.RunService.Heartbeat:Connect(function()
+		if not genv.killTPBlacklistedOnly then return end
+		local r = PlayerData.Player.Character and PlayerData.Player.Character:FindFirstChild("HumanoidRootPart")
+		if not r then return end
+		local t, d
+		for _, p in ipairs(Services.Players:GetPlayers()) do
+			local x = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+			if p ~= PlayerData.Player and x and isTeleportBlacklisted(p) and isPlayerAlive(p) then
+				local n = (r.Position - x.Position).Magnitude
+				if not d or n < d then
+					t, d = x, n
+				end
+			end
+		end
+		if t then
+			r.CFrame = t.CFrame * CFrame.new(0, 0, 5)
+			gettool()
+		end
+	end)
+end)
+
+Tabs.Killing:AddSwitch("Teleport Return",function(s)
+	genv.killTPBlacklistedOnly=s
+	if genv.killTPConnection then genv.killTPConnection:Disconnect() end
+	if not s then return end
+	genv.killTPConnection=Services.RunService.Heartbeat:Connect(function()
+		local r=PlayerData.Player.Character and PlayerData.Player.Character:FindFirstChild("HumanoidRootPart")
+		if not r then return end
+		local t,d,h
+		for _,p in ipairs(Services.Players:GetPlayers())do
+			local c=p.Character
+			local x=c and c:FindFirstChild("HumanoidRootPart")
+			local m=c and c:FindFirstChildOfClass("Humanoid")
+			if p~=PlayerData.Player and x and m and m.Health>0 and isTeleportBlacklisted(p)then
+				local n=(r.Position-x.Position).Magnitude
+				if not d or n<d then t,d,h=x,n,m end
+			end
+		end
+		if t then
+			local o=r.CFrame
+			h.Died:Once(function()
+				task.wait()
+				local b=PlayerData.Player.Character and PlayerData.Player.Character:FindFirstChild("HumanoidRootPart")
+				if b then b.CFrame=o end
+			end)
+			r.CFrame=t.CFrame*CFrame.new(0,0,5)
+			gettool()
+		end
+	end)
+end)
+
+Tabs.Killing:AddSwitch("Kill Watchlist", function(bool)
+	genv.killWatchlistedClans = bool
+	if bool then
+		if not genv.watchlistedClansKillConnection then
+			genv.watchlistedClansKillConnection = Services.RunService.Heartbeat:Connect(function()
+				if genv.killWatchlistedClans then
+					for _, player in ipairs(Services.Players:GetPlayers()) do
+						if player ~= PlayerData.Player and isWatchlistedClan(player) then
+							killPlayer(player)
+						end
+					end
+				end
+			end)
+		end
+	else
+		if genv.watchlistedClansKillConnection then
+			genv.watchlistedClansKillConnection:Disconnect()
+			genv.watchlistedClansKillConnection = nil
+		end
+	end
+end)
+
+Tabs.Killing:AddLabel("______________________________________________")
+
+local blacklistLabel = Tabs.Killing:AddLabel("Blacklist: None")
+blacklistLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+Tabs.Killing:AddButton("Clear Blacklist", function() genv.blacklistedPlayers = {} end)
+
+local tpListLabel = Tabs.Killing:AddLabel("TpList: None")
+tpListLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+Tabs.Killing:AddButton("Clear TpList", function() genv.tpBlacklistedPlayers = {} end)
+
+local watchlistLabel = Tabs.Killing:AddLabel("Watchlist: None")
+watchlistLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+Tabs.Killing:AddButton("Clear Watchlist", function() genv.watchlistedClans = {} end)
+
+task.spawn(function()
+	while true do
+		blacklistLabel.Text = #genv.blacklistedPlayers == 0 and "Blacklist: None" or "Blacklist: " .. table.concat(genv.blacklistedPlayers, ", ")
+		tpListLabel.Text = #genv.tpBlacklistedPlayers == 0 and "TpList: None" or "TpList: " .. table.concat(genv.tpBlacklistedPlayers, ", ")
+		watchlistLabel.Text = #genv.watchlistedClans == 0 and "Watchlist: None" or "Watchlist: " .. table.concat(genv.watchlistedClans, ", ")
+		task.wait(0.01)
+	end
+end)
+
+local Utils = {}
+
+function Utils.formatNumber(n)
+	if n >= 1e15 then 
+		return string.format("%.1fqa", n / 1e15)
+	elseif n >= 1e12 then 
+		return string.format("%.1ft", n / 1e12)
+	elseif n >= 1e9 then 
+		return string.format("%.1fb", n / 1e9)
+	elseif n >= 1e6 then 
+		return string.format("%.1fm", n / 1e6)
+	elseif n >= 1e3 then 
+		return string.format("%.1fk", n / 1e3)
+	else 
+		return string.format("%.1f", n)
+	end
+end
+
+function Utils.formatWithCommas(n)
+	local formatted = tostring(math.floor(n))
+	while true do
+		local k
+		formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
+		if k == 0 then break end
+	end
+	return formatted
+end
+
+local SpecsData = {
+	PlayerToInspect = nil,
+	StatDefinitions = {
+		{name = "Strength", statName = "Strength"},
+		{name = "Durability", statName = "Durability"}
+	},
+	StatLabels = {}
+}
+
+local specdropdown = Tabs.Stats:AddDropdown("Choose Player", function(text)
+	for _, player in ipairs(Services.Players:GetPlayers()) do
+		if text == player.DisplayName .. " | " .. player.Name then
+			SpecsData.PlayerToInspect = player
+			break
+		end
+	end
+end)
+
+populateDropdownWithPlayers(specdropdown, false)
+
+local playerNameLabel = Tabs.Stats:AddLabel("Name: N/A")
+playerNameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+
+for _, info in ipairs(SpecsData.StatDefinitions) do
+	local label = Tabs.Stats:AddLabel(info.name .. ": N/A")
+	label.TextColor3 = Color3.fromRGB(255, 255, 0)
+	SpecsData.StatLabels[info.name] = label
+end
+
+Tabs.Stats:AddLabel("______________________________________________")
+
+local AdvancedStats = {
+	HealthLabel = Tabs.Stats:AddLabel("Enemy Health: N/A"),
+	EnemyDamageLabel = Tabs.Stats:AddLabel("Enemy Damage: N/A"),
+	PlayerHealthLabel = Tabs.Stats:AddLabel("Your Health: N/A"),
+	PlayerDamageLabel = Tabs.Stats:AddLabel("Your Damage: N/A"),
+	HitsToKillLabel = Tabs.Stats:AddLabel("Hits To Kill: N/A")
+}
+
+AdvancedStats.HealthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+AdvancedStats.EnemyDamageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+AdvancedStats.PlayerHealthLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+AdvancedStats.PlayerDamageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+AdvancedStats.HitsToKillLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+
+local StatsCache = {
+	health = 0,
+	enemyDamage = 0,
+	playerHealth = 0,
+	playerDamage = 0,
+	hitsToKill = "N/A"
+}
+
+local function calculatePlayerHealth(targetPlayer)
+	if not targetPlayer then return 0 end
+	local durabilityStat = targetPlayer:FindFirstChild("Durability") or
+		(targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Durability"))
+	if not durabilityStat then return 0 end
+	local totalMultiplier = 1
+	if targetPlayer:FindFirstChild("ultimatesFolder") and targetPlayer.ultimatesFolder:FindFirstChild("Infernal Health") then
+		totalMultiplier = totalMultiplier + 0.15 * (targetPlayer.ultimatesFolder["Infernal Health"].Value or 0)
+	end
+	if targetPlayer:FindFirstChild("equippedPets") then
+		for _, petValue in ipairs(targetPlayer.equippedPets:GetChildren()) do
+			if petValue:IsA("ObjectValue") and petValue.Value then
+				if string.lower(petValue.Value.Name):match("mighty") and string.lower(petValue.Value.Name):match("monster") then
+					totalMultiplier = totalMultiplier + 0.5
+				end
+				if string.lower(petValue.Value.Name):match("small") and string.lower(petValue.Value.Name):match("fry") then
+					totalMultiplier = totalMultiplier + 0.25
+				end
+			end
+		end
+	end
+	return durabilityStat.Value * totalMultiplier
+end
+
+local function calculatePlayerDamage(targetPlayer)
+	if not targetPlayer then return 0 end
+	if not targetPlayer:FindFirstChild("leaderstats") or not targetPlayer.leaderstats:FindFirstChild("Strength") then return 0 end
+	local baseDamage = targetPlayer.leaderstats.Strength.Value * 0.06666666666666667
+	local totalMultiplier = 1
+	if targetPlayer:FindFirstChild("ultimatesFolder") and targetPlayer.ultimatesFolder:FindFirstChild("Demon Damage") then
+		totalMultiplier = totalMultiplier + 0.1 * (targetPlayer.ultimatesFolder["Demon Damage"].Value or 0)
+	end
+	if targetPlayer:FindFirstChild("equippedPets") then
+		for _, petValue in ipairs(targetPlayer.equippedPets:GetChildren()) do
+			if petValue:IsA("ObjectValue") and petValue.Value then
+				if string.lower(petValue.Value.Name):match("wild") and string.lower(petValue.Value.Name):match("wizard") then
+					totalMultiplier = totalMultiplier + 0.5
+				end
+				if string.lower(petValue.Value.Name):match("chaos") and string.lower(petValue.Value.Name):match("sorcerer") then
+					totalMultiplier = totalMultiplier + 0.25
+				end
+			end
+		end
+	end
+	return baseDamage * totalMultiplier
+end
+
+local function updateStatLabels(targetPlayer)
+	if not targetPlayer then return end
+	playerNameLabel.Text = "Name: " .. targetPlayer.DisplayName
+	if not targetPlayer:FindFirstChild("leaderstats") then return end
+	for _, info in ipairs(SpecsData.StatDefinitions) do
+		local statObject = targetPlayer.leaderstats:FindFirstChild(info.statName) or targetPlayer:FindFirstChild(info.statName)
+		if statObject then
+			SpecsData.StatLabels[info.name].Text = string.format("%s: %s (%s)", info.name,
+				Utils.formatNumber(statObject.Value), Utils.formatWithCommas(statObject.Value))
+		else
+			SpecsData.StatLabels[info.name].Text = info.name .. ": 0 (0)"
+		end
+	end
+end
+
+local function updateAdvancedStats(targetPlayer)
+	if not targetPlayer then
+		AdvancedStats.HealthLabel.Text = "Enemy Health: N/A"
+		AdvancedStats.EnemyDamageLabel.Text = "Enemy Damage: N/A"
+		AdvancedStats.PlayerHealthLabel.Text = "Your Health: N/A"
+		AdvancedStats.PlayerDamageLabel.Text = "Your Damage: N/A"
+		AdvancedStats.HitsToKillLabel.Text = "Hits To Kill: N/A"
+		return
+	end
+	StatsCache.health = calculatePlayerHealth(targetPlayer)
+	StatsCache.enemyDamage = calculatePlayerDamage(targetPlayer)
+	StatsCache.playerHealth = calculatePlayerHealth(PlayerData.Player)
+	StatsCache.playerDamage = calculatePlayerDamage(PlayerData.Player)
+	StatsCache.hitsToKill = StatsCache.playerDamage <= 0 and "∞" or
+		(math.ceil(StatsCache.health / StatsCache.playerDamage) > 200 and "∞" or
+		(math.ceil(StatsCache.health / StatsCache.playerDamage) < 1 and "instant" or
+		math.ceil(StatsCache.health / StatsCache.playerDamage)))
+	AdvancedStats.HealthLabel.Text = string.format("Enemy Health: %s (%s)", Utils.formatNumber(StatsCache.health), Utils.formatWithCommas(StatsCache.health))
+	AdvancedStats.EnemyDamageLabel.Text = string.format("Enemy Damage: %s (%s)", Utils.formatNumber(StatsCache.enemyDamage), Utils.formatWithCommas(StatsCache.enemyDamage))
+	AdvancedStats.PlayerHealthLabel.Text = string.format("Your Health: %s (%s)", Utils.formatNumber(StatsCache.playerHealth), Utils.formatWithCommas(StatsCache.playerHealth))
+	AdvancedStats.PlayerDamageLabel.Text = string.format("Your Damage: %s (%s)", Utils.formatNumber(StatsCache.playerDamage), Utils.formatWithCommas(StatsCache.playerDamage))
+	AdvancedStats.HitsToKillLabel.Text = string.format("Hits to Kill: %s", tostring(StatsCache.hitsToKill))
+end
+
+task.spawn(function()
+	while true do
+		if SpecsData.PlayerToInspect then updateStatLabels(SpecsData.PlayerToInspect) end
+		updateAdvancedStats(SpecsData.PlayerToInspect)
+		task.wait(0.01)
+	end
+end)
+
+Tabs.Stats:AddLabel("______________________________________________")
+
+local floatingStats = {
+	enabled = false,
+	labels = {},
+	isSpectating = false,
+	targetPlayer = nil
+}
+
+local function createFloatingText(size, color)
+	local t = Drawing.new("Text")
+	t.Visible = false
+	t.Color = color
+	t.Outline = false
+	t.OutlineColor = Color3.fromRGB(0, 0, 0)
+	t.Size = size
+	t.Font = 1
+	t.Center = true
+	t.Transparency = 3
+	return t
+end
+
+local function getOrCreateLabels(player)
+	if not floatingStats.labels[player] then
+		floatingStats.labels[player] = {
+			name = createFloatingText(28, Color3.fromRGB(255, 0, 0)),
+			hp = createFloatingText(24, Color3.fromRGB(0, 255, 0)),
+			damage = createFloatingText(24, Color3.fromRGB(0, 255, 0)),
+		}
+	end
+	return floatingStats.labels[player]
+end
+
+local function removeLabels(player)
+	if floatingStats.labels[player] then
+		for _, label in pairs(floatingStats.labels[player]) do
+			label.Visible = false
+			label:Remove()
+		end
+		floatingStats.labels[player] = nil
+	end
+end
+
+local function hideLabels(labels)
+	for _, label in pairs(labels) do
+		label.Visible = false
+	end
+end
+
+local currentCamera = workspace.CurrentCamera
+
+local SelectPlayer = Tabs.Stats:AddDropdown("Select Player", function(text)
+	for _, player in ipairs(Services.Players:GetPlayers()) do
+		if text == player.DisplayName .. " | " .. player.Name then
+			floatingStats.targetPlayer = player
+			break
+		end
+	end
+end)
+
+populateDropdownWithPlayers(SelectPlayer, true)
+
+Tabs.Stats:AddSwitch("Spectate", function(bool)
+	floatingStats.isSpectating = bool
+	if not bool then
+		if PlayerData.Player.Character and PlayerData.Player.Character:FindFirstChild("Humanoid") then
+			currentCamera.CameraSubject = PlayerData.Player.Character.Humanoid
+		end
+	end
+end)
+
+Tabs.Stats:AddSwitch("Stats", function(bool)
+	floatingStats.enabled = bool
+	if not bool then
+		for _, labels in pairs(floatingStats.labels) do
+			hideLabels(labels)
+		end
+	end
+end)
+
+Services.Players.PlayerRemoving:Connect(function(player)
+	removeLabels(player)
+	if specdropdown then 
+		specdropdown:Clear()
+		populateDropdownWithPlayers(specdropdown, false)
+	end
+	SelectPlayer:Clear()
+	populateDropdownWithPlayers(SelectPlayer, true)
+	if floatingStats.targetPlayer == player then
+		floatingStats.targetPlayer = nil
+	end
+end)
+
+Services.RunService.RenderStepped:Connect(function()
+	if not floatingStats.enabled then
+		for _, labels in pairs(floatingStats.labels) do
+			hideLabels(labels)
+		end
+		return
+	end
+	local playersToShow = {}
+	if floatingStats.isSpectating and floatingStats.targetPlayer then
+		table.insert(playersToShow, floatingStats.targetPlayer)
+	else
+		playersToShow = Services.Players:GetPlayers()
+	end
+	for _, player in ipairs(Services.Players:GetPlayers()) do
+		if not table.find(playersToShow, player) then
+			if floatingStats.labels[player] then
+				hideLabels(floatingStats.labels[player])
+			end
+		end
+	end
+	for _, player in ipairs(playersToShow) do
+		if player ~= PlayerData.Player then
+			local character = player.Character
+			local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+			local humanoid = character and character:FindFirstChild("Humanoid")
+			if not rootPart or not humanoid or humanoid.Health <= 0 then
+				if floatingStats.labels[player] then
+					hideLabels(floatingStats.labels[player])
+				end
+				continue
+			end
+			local viewportPos, onScreen = currentCamera:WorldToViewportPoint(rootPart.Position + Vector3.new(0, 3.25, 0))
+			if not onScreen then
+				hideLabels(floatingStats.labels[player])
+				continue
+			end
+			local labels = getOrCreateLabels(player)
+			local screenPos = Vector2.new(viewportPos.X, viewportPos.Y)
+			labels.name.Text = player.DisplayName
+			labels.name.Position = screenPos - Vector2.new(0, 45)
+			labels.name.Visible = true
+			labels.hp.Text = "HP:  " .. Utils.formatNumber(calculatePlayerHealth(player))
+			labels.hp.Position = screenPos - Vector2.new(0, 20)
+			labels.hp.Visible = true
+			labels.damage.Text = "DMG:  " .. Utils.formatNumber(calculatePlayerDamage(player))
+			labels.damage.Position = screenPos + Vector2.new(0, 5)
+			labels.damage.Visible = true
+		end
+	end
+end)
+
+Services.RunService.RenderStepped:Connect(function()
+	if not floatingStats.isSpectating then return end
+	local target = floatingStats.targetPlayer
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+		currentCamera.CameraSubject = target.Character.Humanoid
+	end
+end)
