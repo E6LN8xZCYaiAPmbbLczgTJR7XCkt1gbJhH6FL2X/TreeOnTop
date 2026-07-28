@@ -413,7 +413,7 @@ KillingTab:Toggle({
                     for _, Name in ipairs(_G.TpListedPlayers) do
                         local Target = nil
                         for _, P in ipairs(Players:GetPlayers()) do
-                            if P.Name:lower() == Name:lower() then
+                            if P.DisplayName:lower() == Name:lower() then
                                 Target = P
                                 break
                             end
@@ -426,7 +426,7 @@ KillingTab:Toggle({
                             local Hum = Target.Character:FindFirstChildOfClass("Humanoid")
                             if Hum then
                                 Hum.Died:Once(function()
-                                    wait(0.002)
+                                    task.wait(0.02)
                                     if Hrp and Hrp.Parent then
                                         Hrp.CFrame = Origin
                                     end
