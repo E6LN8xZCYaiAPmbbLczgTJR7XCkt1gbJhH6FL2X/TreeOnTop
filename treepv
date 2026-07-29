@@ -1,0 +1,646 @@
+local windui = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+windui:AddTheme({
+    Name = "TreeTheme",
+    Accent = Color3.fromHex("#FF10F0"),
+    Background = Color3.fromHex("#000000"),
+    Outline = Color3.fromHex("#FF10F0"),
+    Text = Color3.fromHex("#FF10F0"),
+    Placeholder = Color3.fromHex("#FF10F0"),
+    Button = Color3.fromHex("#FF10F0")
+})
+
+local players = game:GetService("Players")
+local localplayer = players.LocalPlayer
+local displayname = localplayer.DisplayName
+
+local window = windui:CreateWindow({
+    Title = displayname .. "  is a fag",
+    Theme = "TreeTheme",
+    Transparent = true,
+    ToggleKey = Enum.KeyCode.RightShift
+})
+
+local fuckpreparationTab = window:Tab({
+    Title = "fuck preparation"
+})
+
+local smitingthysopstab = window:Tab({
+    Title = "smiting thys ops"
+})
+
+local thespamypacktab = window:Tab({
+    Title = "the spamypack"
+})
+
+local workspace = game:GetService("Workspace")
+
+fuckpreparationTab:Toggle({
+    Title = "no lube (anti fling)",
+    Value = false,
+    Callback = function(bool)
+        local character = workspace:FindFirstChild(localplayer.Name)
+        if not character then return end
+        local rootpart = character:FindFirstChild("HumanoidRootPart")
+        if not rootpart then return end
+        if bool then
+            local bodyvelocity = Instance.new("BodyVelocity")
+            bodyvelocity.MaxForce = Vector3.new(100000, 0, 100000)
+            bodyvelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyvelocity.P = 1250
+            bodyvelocity.Parent = rootpart
+        else
+            local existingvelocity = rootpart:FindFirstChild("BodyVelocity")
+            if existingvelocity and existingvelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+                existingvelocity:Destroy()
+            end
+        end
+    end
+})
+
+local p = game:GetService("Players").LocalPlayer
+
+fuckpreparationTab:Toggle({
+    Title = "show your slaves (show your pets)",
+    Value = false,
+    Callback = function(bool)
+        if p:FindFirstChild("hidePets") then
+            p.hidePets.Value = bool
+        end
+    end
+})
+
+fuckpreparationTab:Toggle({
+    Title = "show others slaves (show others pets)",
+    Value = false,
+    Callback = function(bool)
+        if p:FindFirstChild("showOtherPetsOn") then
+            p.showOtherPetsOn.Value = bool
+        end
+    end
+})
+
+local replicatedstorage = game:GetService("ReplicatedStorage")
+
+fuckpreparationTab:Toggle({
+    Title = "hide tampon (hide frames)",
+    Value = false,
+    Callback = function(bool)        
+        for _, obj in pairs(replicatedstorage:GetChildren()) do
+            if obj.Name:match("Frame$") and obj:IsA("GuiObject") then
+                obj.Visible = not bool
+            end
+        end
+    end
+})
+
+local waterpart = Instance.new("Part")
+waterpart.Name = "WalkOnWaterPart"
+waterpart.Size = Vector3.new(4, 0.1, 4)
+waterpart.Transparency = 1
+waterpart.Anchored = true
+waterpart.CanCollide = false
+waterpart.CanTouch = false
+waterpart.CanQuery = false
+waterpart.Parent = workspace
+local runservice = game:GetService("RunService")
+
+fuckpreparationTab:Toggle({
+    Title = "become jesus (walk on water)",
+    Value = false,
+    Callback = function(bool)
+        if bool then
+            waterpart.CanCollide = true
+            if not _G.walkonwaterconnection then
+                _G.walkonwaterconnection = runservice.RenderStepped:Connect(function()
+                    local character = localplayer.Character
+                    local root = character and character:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        waterpart.CFrame = CFrame.new(root.Position.X, -9.5, root.Position.Z)
+                    end
+                end)
+            end
+        else
+            if _G.walkonwaterconnection then
+                _G.walkonwaterconnection:Disconnect()
+                _G.walkonwaterconnection = nil
+            end
+            waterpart.CanCollide = false
+            waterpart.Position = Vector3.new(0, -10000, 0)
+        end
+    end
+})
+
+local lighting = game:GetService("Lighting")
+
+fuckpreparationTab:Button({
+    Title = "become disabled (anti lag)",
+    Callback = function()
+        local terrain = workspace:FindFirstChildWhichIsA("Terrain")
+        if terrain then
+            terrain.WaterWaveSize = 0
+            terrain.WaterWaveSpeed = 0
+            terrain.WaterReflectance = 0
+            terrain.WaterTransparency = 1
+        end
+        lighting.ClockTime = 0
+        lighting.GlobalShadows = false
+        lighting.FogEnd = 9e9
+        lighting.FogStart = 9e9
+        settings().Rendering.QualityLevel = 1
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
+            elseif v:IsA("Decal") then
+                v.Transparency = 1
+                v.Texture = ""
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = NumberRange.new(0)
+            end
+        end
+        for _, v in pairs(lighting:GetDescendants()) do
+            if v:IsA("PostEffect") then
+                v.Enabled = false
+            end
+        end
+        workspace.DescendantAdded:Connect(function(child)
+            spawn(function()
+                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
+                    runservice.Heartbeat:Wait()
+                    child:Destroy()
+                elseif child:IsA("BasePart") then
+                    child.CastShadow = false
+                end
+            end)
+        end)
+    end
+})
+
+_G.blacklistedplayers = _G.blacklistedplayers or {}
+_G.tplistedplayers = _G.tplistedplayers or {}
+_G.watchlistedplayers = _G.watchlistedplayers or {}
+
+local ignoreBlacklistCallback = false
+local ignoreTPCallback = false
+
+local function isblacklisted(player)
+    for _, name in ipairs(_G.blacklistedplayers) do
+        if name:lower() == player.DisplayName:lower() then
+            return true
+        end
+    end
+    return false
+end
+
+local function istplisted(player)
+    for _, name in ipairs(_G.tplistedplayers) do
+        if name:lower() == player.DisplayName:lower() then
+            return true
+        end
+    end
+    return false
+end
+
+local function iswatchlisted(player)
+    local namelower = player.Name:lower()
+    local displaylower = player.DisplayName:lower()
+    for _, entry in ipairs(_G.watchlistedplayers) do
+        local cl = entry:lower()
+        if namelower:find(cl, 1, true) or displaylower:find(cl, 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function getplayerdisplaytext(player)
+    return player.DisplayName
+end
+
+local function getplayerlist()
+    local list = {}
+    for _, player in ipairs(players:GetPlayers()) do
+        if player ~= localplayer then
+            table.insert(list, getplayerdisplaytext(player))
+        end
+    end
+    return list
+end
+
+local blacklistdropdown = smitingthysopstab:Dropdown({
+    Title = "add to rapelist (no tp)",
+    Values = getplayerlist(),
+    Callback = function(selectedtext)
+        if ignoreBlacklistCallback then return end
+        for _, name in ipairs(_G.blacklistedplayers) do
+            if name:lower() == selectedtext:lower() then return end
+        end
+        table.insert(_G.blacklistedplayers, selectedtext)
+    end
+})
+
+local tpdropdown = smitingthysopstab:Dropdown({
+    Title = "add to epsteinlist (tp)",
+    Values = getplayerlist(),
+    Callback = function(selectedtext)
+        if ignoreTPCallback then return end
+        for _, name in ipairs(_G.tplistedplayers) do
+            if name:lower() == selectedtext:lower() then return end
+        end
+        table.insert(_G.tplistedplayers, selectedtext)
+    end
+})
+
+local function refreshBlacklistDropdown()
+    ignoreBlacklistCallback = true
+    blacklistdropdown:Refresh(getplayerlist())
+    task.defer(function()
+        ignoreBlacklistCallback = false
+    end)
+end
+
+local function refreshTPDropdown()
+    ignoreTPCallback = true
+    tpdropdown:Refresh(getplayerlist())
+    task.defer(function()
+        ignoreTPCallback = false
+    end)
+end
+
+players.PlayerAdded:Connect(function(player)
+    if player ~= localplayer then
+        refreshBlacklistDropdown()
+        refreshTPDropdown()
+    end
+end)
+
+players.PlayerRemoving:Connect(function()
+    refreshBlacklistDropdown()
+    refreshTPDropdown()
+end)
+
+smitingthysopstab:Input({
+    Title = "add to fucklist (watchlist)",
+    Callback = function(text)
+        text = text:match("^%s*(.-)%s*$")
+        if text == "" then return end
+        for _, v in ipairs(_G.watchlistedplayers) do
+            if v:lower() == text:lower() then return end
+        end
+        table.insert(_G.watchlistedplayers, text)
+    end
+})
+
+smitingthysopstab:Divider()
+
+local function checkcharacter()
+    if not localplayer.Character then
+        repeat wait() until localplayer.Character
+    end
+    return localplayer.Character
+end
+
+local muscleevent = localplayer:WaitForChild("muscleEvent")
+
+local function gettool()
+    for _, v in pairs(localplayer.Backpack:GetChildren()) do
+        if v.Name == "Punch" and localplayer.Character and localplayer.Character:FindFirstChild("Humanoid") then
+            localplayer.Character.Humanoid:EquipTool(v)
+        end
+    end
+    muscleevent:FireServer("punch", "leftHand")
+    muscleevent:FireServer("punch", "rightHand")
+end
+
+local function isplayeralive(player)
+    return player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and
+           player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
+end
+
+local function killplayer(target)
+    if not isplayeralive(target) then return end
+    local character = checkcharacter()
+    if character and character:FindFirstChild("LeftHand") then
+        pcall(function()
+            firetouchinterest(target.Character.HumanoidRootPart, character.LeftHand, 0)
+            firetouchinterest(target.Character.HumanoidRootPart, character.LeftHand, 1)
+            gettool()
+        end)
+    end
+end
+
+smitingthysopstab:Toggle({
+    Title = "rape (no tp)",
+    Value = false,
+    Callback = function(bool)
+        _G.killblacklistedonly = bool
+        if bool then
+            if not _G.blacklistkillconnection then
+                _G.blacklistkillconnection = runservice.Heartbeat:Connect(function()
+                    if _G.killblacklistedonly then
+                        for _, player in ipairs(players:GetPlayers()) do
+                            if player ~= localplayer and isblacklisted(player) then
+                                killplayer(player)
+                            end
+                        end
+                    end
+                end)
+            end
+        else
+            if _G.blacklistkillconnection then
+                _G.blacklistkillconnection:Disconnect()
+                _G.blacklistkillconnection = nil
+            end
+        end
+    end
+})
+
+smitingthysopstab:Toggle({
+    Title = "eat (tp)",
+    Value = false,
+    Callback = function(bool)
+        _G.killtplisted = bool
+        if bool then
+            if not _G.tpkillconnection then
+                _G.tpkillconnection = runservice.Heartbeat:Connect(function()
+                    if not _G.killtplisted then return end
+                    local character = checkcharacter()
+                    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+                    if not hrp then return end
+                    for _, name in ipairs(_G.tplistedplayers) do
+                        local target = nil
+                        for _, p in ipairs(players:GetPlayers()) do
+                            if p.DisplayName:lower() == name:lower() then
+                                target = p
+                                break
+                            end
+                        end
+                        if target and isplayeralive(target) then
+                            local targethrp = target.Character.HumanoidRootPart
+                            local origin = hrp.CFrame
+                            hrp.CFrame = targethrp.CFrame * CFrame.new(0, 0, 2)
+                            gettool()
+                            local hum = target.Character:FindFirstChildOfClass("Humanoid")
+                            if hum then
+                                hum.Died:Once(function()
+                                    task.wait(0.02)
+                                    if hrp and hrp.Parent then
+                                        hrp.CFrame = origin
+                                    end
+                                end)
+                            end
+                            break
+                        end
+                    end
+                end)
+            end
+        else
+            if _G.tpkillconnection then
+                _G.tpkillconnection:Disconnect()
+                _G.tpkillconnection = nil
+            end
+        end
+    end
+})
+
+smitingthysopstab:Toggle({
+    Title = "lick (watchlist)",
+    Value = false,
+    Callback = function(bool)
+        _G.killwatchlisted = bool
+        if bool then
+            if not _G.watchlistkillconnection then
+                _G.watchlistkillconnection = runservice.Heartbeat:Connect(function()
+                    if not _G.killwatchlisted then return end
+                    for _, player in ipairs(players:GetPlayers()) do
+                        if player ~= localplayer and iswatchlisted(player) and isplayeralive(player) then
+                            killplayer(player)
+                        end
+                    end
+                end)
+            end
+        else
+            if _G.watchlistkillconnection then
+                _G.watchlistkillconnection:Disconnect()
+                _G.watchlistkillconnection = nil
+            end
+        end
+    end
+})
+
+smitingthysopstab:Divider()
+
+local blacklistlabel = smitingthysopstab:Paragraph({
+    Title = "rapelist (blacklist)",
+    Desc = "no niggas detected"
+})
+
+local tplabel = smitingthysopstab:Paragraph({
+    Title = "epsteinlist (tplist)",
+    Desc = "zero niggers found"
+})
+
+local watchlistlabel = smitingthysopstab:Paragraph({
+    Title = "fucklist (watchlist)",
+    Desc = "absolutely no minors"
+})
+
+smitingthysopstab:Button({
+    Title = "stop raping em (blacklist)",
+    Callback = function()
+        _G.blacklistedplayers = {}
+    end
+})
+
+smitingthysopstab:Button({
+    Title = "stop fucking niggers (tplist)",
+    Callback = function()
+        _G.tplistedplayers = {}
+    end
+})
+
+smitingthysopstab:Button({
+    Title = "stop watching children (watchlist)",
+    Callback = function()
+        _G.watchlistedplayers = {}
+    end
+})
+
+local function updateblacklistlabel()
+    if #_G.blacklistedplayers == 0 then
+        blacklistlabel:SetDesc("no niggas detected (no tp)")
+    else
+        blacklistlabel:SetDesc(table.concat(_G.blacklistedplayers, ", "))
+    end
+end
+
+local function updatetplistlabel()
+    if #_G.tplistedplayers == 0 then
+        tplabel:SetDesc("zero niggers found (tp)")
+    else
+        tplabel:SetDesc(table.concat(_G.tplistedplayers, ", "))
+    end
+end
+
+local function updatewatchlistlabel()
+    if #_G.watchlistedplayers == 0 then
+        watchlistlabel:SetDesc("absolutely no minors (watchlist)")
+    else
+        watchlistlabel:SetDesc(table.concat(_G.watchlistedplayers, ", "))
+    end
+end
+
+spawn(function()
+    while true do
+        updateblacklistlabel()
+        updatetplistlabel()
+        updatewatchlistlabel()
+        wait(0.02)
+    end
+end)
+
+local equipevent = replicatedstorage.rEvents.equipPetEvent
+local petsfolder = localplayer.petsFolder
+
+local function equippets(petname)
+    for _, folder in pairs(petsfolder:GetChildren()) do
+        if folder:IsA("Folder") then
+            for _, pet in pairs(folder:GetChildren()) do
+                equipevent:FireServer("unequipPet", pet)
+            end
+        end
+    end
+    wait(0.002)
+    local petstoequip = {}
+    local targetname = string.lower(petname)
+    for _, pet in pairs(petsfolder.Unique:GetChildren()) do
+        if string.lower(pet.Name) == targetname then
+            table.insert(petstoequip, pet)
+        end
+    end
+    for i = 1, math.min(8, #petstoequip) do
+        equipevent:FireServer("equipPet", petstoequip[i])
+        wait(0.001)
+    end
+end
+
+thespamypacktab:Button({
+    Title = "punchy wizard",
+    Callback = function()
+        equippets("Wild Wizard")
+    end
+})
+
+thespamypacktab:Button({
+    Title = "health monster",
+    Callback = function()
+        equippets("Mighty Monster")
+    end
+})
+
+local packspam = false
+local currentpet = "Mighty Monster"
+
+thespamypacktab:Toggle({
+    Title = "punchy health spam",
+    Value = false,
+    Callback = function(state)
+        packspam = state
+        if state then
+            spawn(function()
+                local petsmm = {}
+                local petsww = {}
+                local lastrefresh = 0
+                while packspam do
+                    if tick() - lastrefresh > 3 then
+                        for _, folder in pairs(petsfolder:GetChildren()) do
+                            if folder:IsA("Folder") then
+                                for _, pet in pairs(folder:GetChildren()) do
+                                    pcall(equipevent.FireServer, equipevent, "unequipPet", pet)
+                                end
+                            end
+                        end
+                        table.clear(petsmm)
+                        table.clear(petsww)
+                        for _, pet in pairs(petsfolder.Unique:GetChildren()) do
+                            if pet.Name == "Mighty Monster" then
+                                table.insert(petsmm, pet)
+                            elseif pet.Name == "Wild Wizard" then
+                                table.insert(petsww, pet)
+                            end
+                        end
+                        lastrefresh = tick()
+                    end
+                    local petstoequip = currentpet == "Mighty Monster" and petsmm or petsww
+                    local petstounequip = currentpet == "Mighty Monster" and petsww or petsmm
+                    local otherpet = currentpet == "Mighty Monster" and "Wild Wizard" or "Mighty Monster"
+                    local max = math.min(8, #petstoequip, #petstounequip)
+                    local delay = currentpet == "Wild Wizard" and 0.001 or 0.002
+                    for i = 1, max do
+                        local unequippet = petstounequip[i]
+                        local equippet = petstoequip[i]
+                        if unequippet and unequippet.Parent then
+                            pcall(equipevent.FireServer, equipevent, "unequipPet", unequippet)
+                        end
+                        if equippet and equippet.Parent then
+                            pcall(equipevent.FireServer, equipevent, "equipPet", equippet)
+                        end
+                        wait(delay)
+                    end
+                    currentpet = otherpet
+                end
+            end)
+        end
+    end
+})
+
+local mmspam = false
+
+thespamypacktab:Toggle({
+    Title = "health spamy",
+    Value = false,
+    Callback = function(state)
+        mmspam = state
+        if state then
+            spawn(function()
+                local pets = {}
+                local lastrefresh = 0
+                while mmspam do
+                    if tick() - lastrefresh > 3 then
+                        for _, folder in pairs(petsfolder:GetChildren()) do
+                            if folder:IsA("Folder") then
+                                for _, pet in pairs(folder:GetChildren()) do
+                                    pcall(equipevent.FireServer, equipevent, "unequipPet", pet)
+                                end
+                            end
+                        end
+                        table.clear(pets)
+                        for _, pet in pairs(petsfolder.Unique:GetChildren()) do
+                            if pet.Name == "Mighty Monster" then
+                                table.insert(pets, pet)
+                            end
+                        end
+                        lastrefresh = tick()
+                    end
+                    local max = math.min(8, #pets)
+                    for i = 1, max do
+                        local pet = pets[i]
+                        if pet and pet.Parent then
+                            pcall(equipevent.FireServer, equipevent, "unequipPet", pet)
+                            pcall(equipevent.FireServer, equipevent, "equipPet", pet)
+                        end
+                        wait(0.001)
+                    end
+                end
+            end)
+        end
+    end
+})
