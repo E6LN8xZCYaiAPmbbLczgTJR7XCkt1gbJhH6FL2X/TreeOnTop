@@ -19,7 +19,6 @@ local Window = WindUI:CreateWindow({
     Theme = "TreeTheme"
 })
 
-
 local MainTab = Window:Tab({
 	Title = "Main"
 })
