@@ -678,6 +678,45 @@ end)
 local dm = b.LocalPlayer.petsFolder.Unique
 local dn = game:GetService("ReplicatedStorage")
 local dp = dn.rEvents.equipPetEvent
+
+h:Button({
+	Title = "Equip Wild Wizards",
+	Callback = function()
+		for _, pet in ipairs(dm:GetChildren()) do
+			if pet.Name ~= "Wild Wizard" then
+				dp:FireServer("unequipPet", pet)
+			end
+		end
+		local dt = 0
+		for _, dw in ipairs(dm:GetChildren()) do
+			if dw.Name == "Wild Wizard" and dt < 8 then
+				dp:FireServer("unequipPet", dw)
+				dp:FireServer("equipPet", dw)
+				dt += 1
+			end
+		end
+	end
+})
+
+h:Button({
+	Title = "Equip Mighty Monsters",
+	Callback = function()
+		for _, pet in ipairs(dm:GetChildren()) do
+			if pet.Name ~= "Mighty Monster" then
+				dp:FireServer("unequipPet", pet)
+			end
+		end
+		local dt = 0
+		for _, dw in ipairs(dm:GetChildren()) do
+			if dw.Name == "Mighty Monster" and dt < 8 then
+				dp:FireServer("unequipPet", dw)
+				dp:FireServer("equipPet", dw)
+				dt += 1
+			end
+		end
+	end
+})
+
 local dq = false
 
 h:Toggle({
