@@ -76,6 +76,9 @@ function e.new(bg)
 	})
 	bh.ScreenGui = bi
 
+	-------------------------------------------------
+	-- TOGGLE / MINIMIZER BUTTON (now draggable)
+	-------------------------------------------------
 	local bj = q("TextButton", {
 		Parent = bi,
 		Size = UDim2.new(0, 45, 0, 45),
@@ -112,6 +115,30 @@ function e.new(bg)
 		TextColor3 = f.TextPrimary,
 	})
 
+	-- Drag logic for the minimizer
+	local toggleDragging = false
+	local toggleDragStart
+	local toggleStartPos
+	local toggleMoved = false
+
+	bj.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			toggleDragging = true
+			toggleMoved = false
+			toggleDragStart = input.Position
+			toggleStartPos = bj.Position
+		end
+	end)
+
+	bj.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			toggleDragging = false
+		end
+	end)
+
+	-------------------------------------------------
+	-- MAIN PANEL
+	-------------------------------------------------
 	local bl = bg.Width or 680
 	local bm = bg.Height or 460
 	local bn = q("Frame", {
@@ -263,15 +290,23 @@ function e.new(bg)
 	})
 	w(cc, 4)
 
+	-------------------------------------------------
+	-- OPEN / CLOSE
+	-------------------------------------------------
 	local cd = true
+
+	-- Click only toggles if the button was NOT dragged
 	bj.MouseButton1Click:Connect(function()
+		if toggleMoved then return end
 		cd = not cd
 		bn.Visible = cd
 	end)
+
 	bp.MouseButton1Click:Connect(function()
 		cd = false
 		bn.Visible = false
 	end)
+
 	bh.Open = function()
 		cd = true
 		bn.Visible = true
@@ -281,6 +316,9 @@ function e.new(bg)
 		bn.Visible = false
 	end
 
+	-------------------------------------------------
+	-- DRAG + RESIZE LOGIC
+	-------------------------------------------------
 	local ce, cf, cg
 	bo.InputBegan:Connect(function(ch)
 		if ch.UserInputType == Enum.UserInputType.MouseButton1 or ch.UserInputType == Enum.UserInputType.Touch then
@@ -313,17 +351,30 @@ function e.new(bg)
 		if co.UserInputType ~= Enum.UserInputType.MouseMovement and co.UserInputType ~= Enum.UserInputType.Touch then
 			return
 		end
+
+		-- Drag main panel
 		if ce then
 			local cp = co.Position - cf
 			bn.Position = UDim2.new(
 				cg.X.Scale, cg.X.Offset + cp.X,
 				cg.Y.Scale, cg.Y.Offset + cp.Y
 			)
+		-- Resize main panel
 		elseif cj then
 			local cq = co.Position - ck
 			local cr = math.max(i, cl.X.Offset + cq.X)
 			local cs = math.max(j, cl.Y.Offset + cq.Y)
 			bn.Size = UDim2.new(cl.X.Scale, cr, cl.Y.Scale, cs)
+		-- Drag the minimizer button
+		elseif toggleDragging then
+			local delta = co.Position - toggleDragStart
+			if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
+				toggleMoved = true
+			end
+			bj.Position = UDim2.new(
+				toggleStartPos.X.Scale, toggleStartPos.X.Offset + delta.X,
+				toggleStartPos.Y.Scale, toggleStartPos.Y.Offset + delta.Y
+			)
 		end
 	end)
 
