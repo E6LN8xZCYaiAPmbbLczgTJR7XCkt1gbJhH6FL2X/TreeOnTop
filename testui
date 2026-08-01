@@ -7,33 +7,33 @@ local e = {}
 e.__index = e
 
 local f = {
-	Background        = Color3.fromRGB(18, 26, 34),
-	HeaderBackground  = Color3.fromRGB(14, 22, 30),
-	SidebarBackground = Color3.fromRGB(12, 19, 27),
-	ButtonBackground  = Color3.fromRGB(25, 36, 47),
-	InputBackground   = Color3.fromRGB(20, 30, 40),
-	AccentStroke      = Color3.fromRGB(137, 207, 240),
-	AccentFill        = Color3.fromRGB(137, 207, 240),
-	AccentSelected    = Color3.fromRGB(22, 52, 72),
-	TextPrimary       = Color3.fromRGB(255, 255, 255),
-	TextSecondary     = Color3.fromRGB(168, 190, 205),
-	TextMuted         = Color3.fromRGB(225, 236, 242),
-	Divider           = Color3.fromRGB(36, 50, 62),
-	Font              = Enum.Font.GothamBlack,
-	FontBody          = Enum.Font.GothamBold,
+	Background        = Color3.fromRGB(18, 18, 22),
+	HeaderBackground  = Color3.fromRGB(22, 22, 28),
+	SidebarBackground = Color3.fromRGB(15, 15, 19),
+	ButtonBackground  = Color3.fromRGB(28, 28, 35),
+	InputBackground   = Color3.fromRGB(32, 32, 40),
+	AccentStroke      = Color3.fromRGB(80, 80, 95),
+	AccentFill        = Color3.fromRGB(90, 90, 110),
+	AccentSelected    = Color3.fromRGB(45, 45, 58),
+	TextPrimary       = Color3.fromRGB(240, 240, 245),
+	TextSecondary     = Color3.fromRGB(160, 160, 175),
+	TextMuted         = Color3.fromRGB(200, 200, 210),
+	Divider           = Color3.fromRGB(40, 40, 50),
+	Font              = Enum.Font.GothamBold,
+	FontBody          = Enum.Font.Gotham,
 }
 
-local g = 10
-local h = 7
-local i = 420
-local j = 300
-local k = 35
-local l = 50
-local m = 22
-local n = 0.55
+local g = 8
+local h = 6
+local i = 380
+local j = 280
+local k = 32
+local l = 36
+local m = 20
+local n = 1 -- full width now (no split)
 
-local o = "\226\150\190"
-local p = "\226\150\184"
+local o = "▼"
+local p = "▶"
 
 local function q(r, s)
 	local t = Instance.new(r)
@@ -48,7 +48,7 @@ local function w(x, y)
 end
 
 local function z(aa, ab, ac)
-	return q("UIStroke", { Parent = aa, Color = ab or f.AccentStroke, Thickness = ac or 1.5 })
+	return q("UIStroke", { Parent = aa, Color = ab or f.AccentStroke, Thickness = ac or 1 })
 end
 
 local function ba(bb)
@@ -57,7 +57,7 @@ local function ba(bb)
 	local bd = math.floor((bb % 86400) / 3600)
 	local be = math.floor((bb % 3600) / 60)
 	local bf = bb % 60
-	return string.format("%dD / %dH / %dM / %dS", bc, bd, be, bf)
+	return string.format("%dD %dH %dM %dS", bc, bd, be, bf)
 end
 
 function e.new(bg)
@@ -76,44 +76,29 @@ function e.new(bg)
 	})
 	bh.ScreenGui = bi
 
+	-- Toggle button
 	local bj = q("TextButton", {
 		Parent = bi,
-		Size = UDim2.new(0, 45, 0, 45),
-		Position = UDim2.new(0.05, 0, 0.1, 0),
+		Size = UDim2.new(0, 38, 0, 38),
+		Position = UDim2.new(0.04, 0, 0.12, 0),
 		BackgroundColor3 = f.HeaderBackground,
 		Text = "",
 		AutoButtonColor = false,
 	})
-	w(bj, 12)
-	q("UIGradient", {
-		Parent = bj,
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.75, 0.87, 0.93)),
-		}),
-		Rotation = 45,
-	})
-	local bk = z(bj)
-	q("UIGradient", {
-		Parent = bk,
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.new(0.7, 0.9, 1)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.2, 0.5, 0.65)),
-		}),
-		Rotation = 45,
-	})
+	w(bj, 10)
+	z(bj, Color3.fromRGB(60, 60, 75), 1)
 	q("TextLabel", {
 		Parent = bj,
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		Text = bg.ToggleLabel or "M",
 		Font = f.Font,
-		TextSize = 26,
+		TextSize = 20,
 		TextColor3 = f.TextPrimary,
 	})
 
-	local bl = bg.Width or 680
-	local bm = bg.Height or 460
+	local bl = bg.Width or 420
+	local bm = bg.Height or 380
 	local bn = q("Frame", {
 		Parent = bi,
 		Size = UDim2.new(0, bl, 0, bm),
@@ -125,9 +110,10 @@ function e.new(bg)
 		Visible = true,
 	})
 	w(bn, g)
-	z(bn)
+	z(bn, Color3.fromRGB(50, 50, 65), 1)
 	bh.Panel = bn
 
+	-- Header
 	local bo = q("Frame", {
 		Parent = bn,
 		Size = UDim2.new(1, 0, 0, k),
@@ -142,55 +128,58 @@ function e.new(bg)
 		Text = "  " .. (bg.Title or "Zenith UI"),
 		TextColor3 = f.TextPrimary,
 		Font = f.Font,
-		TextSize = 14,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 	local bp = q("TextButton", {
 		Parent = bo,
-		Size = UDim2.new(0, 35, 1, 0),
-		Position = UDim2.new(1, -35, 0, 0),
+		Size = UDim2.new(0, 32, 1, 0),
+		Position = UDim2.new(1, -32, 0, 0),
 		BackgroundTransparency = 1,
-		Text = "X",
+		Text = "×",
 		TextColor3 = f.TextSecondary,
 		Font = f.Font,
-		TextSize = 16,
+		TextSize = 18,
 	})
 
+	-- Sidebar
 	local bq = q("Frame", {
 		Parent = bn,
-		Size = UDim2.new(0, 140, 1, -(k + l + m)),
+		Size = UDim2.new(0, 110, 1, -(k + l + m)),
 		Position = UDim2.new(0, 0, 0, k),
 		BackgroundColor3 = f.SidebarBackground,
 	})
 	local br = q("Frame", {
 		Parent = bq,
-		Size = UDim2.new(0, 4, 0, 32),
-		Position = UDim2.new(0, 5, 0, 10),
-		BackgroundColor3 = f.AccentFill,
+		Size = UDim2.new(0, 3, 0, 26),
+		Position = UDim2.new(0, 4, 0, 8),
+		BackgroundColor3 = Color3.fromRGB(120, 120, 145),
 	})
 	w(br, 2)
 	bh.Indicator = br
 
 	local bs = q("ScrollingFrame", {
 		Parent = bq,
-		Size = UDim2.new(1, -5, 1, 0),
+		Size = UDim2.new(1, -4, 1, 0),
 		BackgroundTransparency = 1,
 		ScrollBarThickness = 0,
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 	})
-	q("UIListLayout", { Parent = bs, Padding = UDim.new(0, 5) })
-	q("UIPadding", { Parent = bs, PaddingTop = UDim.new(0, 10) })
+	q("UIListLayout", { Parent = bs, Padding = UDim.new(0, 3) })
+	q("UIPadding", { Parent = bs, PaddingTop = UDim.new(0, 8) })
 	bh.TabList = bs
 
+	-- Content (full width now)
 	local bt = q("Frame", {
 		Parent = bn,
-		Size = UDim2.new(1, -145, 1, -(k + l + m)),
-		Position = UDim2.new(0, 145, 0, k),
+		Size = UDim2.new(1, -115, 1, -(k + l + m)),
+		Position = UDim2.new(0, 115, 0, k),
 		BackgroundTransparency = 1,
 	})
 	bh.Content = bt
 
+	-- Footer
 	local bu = q("Frame", {
 		Parent = bn,
 		Size = UDim2.new(1, 0, 0, l),
@@ -199,31 +188,32 @@ function e.new(bg)
 	})
 	local bv = q("ImageLabel", {
 		Parent = bu,
-		Size = UDim2.new(0, 34, 0, 34),
-		Position = UDim2.new(0, 8, 0.5, -17),
+		Size = UDim2.new(0, 26, 0, 26),
+		Position = UDim2.new(0, 8, 0.5, -13),
 		BackgroundColor3 = f.InputBackground,
 		Image = bg.AvatarImage or "",
 	})
-	w(bv, 17)
-	z(bv, f.AccentStroke, 1)
+	w(bv, 13)
+	z(bv, Color3.fromRGB(60, 60, 75), 1)
 
 	q("TextLabel", {
 		Parent = bu,
-		Size = UDim2.new(1, -58, 1, 0),
-		Position = UDim2.new(0, 50, 0, 0),
+		Size = UDim2.new(1, -50, 1, 0),
+		Position = UDim2.new(0, 42, 0, 0),
 		BackgroundTransparency = 1,
-		Text = bg.FooterText or "",
-		TextColor3 = f.TextPrimary,
-		Font = f.Font,
-		TextSize = 13,
+		Text = bg.FooterText or "Made By MindSindy",
+		TextColor3 = f.TextSecondary,
+		Font = f.FontBody,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 
+	-- Timer bar
 	local bw = q("Frame", {
 		Parent = bn,
 		Size = UDim2.new(1, 0, 0, m),
 		Position = UDim2.new(0, 0, 1, -m),
-		BackgroundColor3 = f.AccentSelected,
+		BackgroundColor3 = Color3.fromRGB(25, 25, 32),
 	})
 	w(bw, g)
 	local bx = q("TextLabel", {
@@ -231,9 +221,9 @@ function e.new(bg)
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		Text = "",
-		TextColor3 = f.TextPrimary,
+		TextColor3 = f.TextSecondary,
 		Font = f.FontBody,
-		TextSize = 12,
+		TextSize = 11,
 	})
 	bh.TimerLabel = bx
 
@@ -242,26 +232,27 @@ function e.new(bg)
 	function bh:ResetTimer()
 		bz = os.clock()
 	end
-	bx.Text = ba(0)
+	bx.Text = "SESSION : " .. ba(0)
 	local ca = 0
 	by = d.Heartbeat:Connect(function(cb)
 		ca = ca + cb
 		if ca >= 1 then
 			ca = ca - 1
-			bx.Text = ba(os.clock() - bz)
+			bx.Text = "SESSION : " .. ba(os.clock() - bz)
 		end
 	end)
 
+	-- Resize handle
 	local cc = q("TextButton", {
 		Parent = bn,
-		Size = UDim2.new(0, 18, 0, 18),
-		Position = UDim2.new(1, -18, 1, -18),
-		BackgroundColor3 = f.AccentFill,
+		Size = UDim2.new(0, 14, 0, 14),
+		Position = UDim2.new(1, -14, 1, -14),
+		BackgroundColor3 = Color3.fromRGB(70, 70, 90),
 		AutoButtonColor = false,
 		Text = "",
 		ZIndex = 10,
 	})
-	w(cc, 4)
+	w(cc, 3)
 
 	local cd = true
 	bj.MouseButton1Click:Connect(function()
@@ -281,6 +272,7 @@ function e.new(bg)
 		bn.Visible = false
 	end
 
+	-- Drag
 	local ce, cf, cg
 	bo.InputBegan:Connect(function(ch)
 		if ch.UserInputType == Enum.UserInputType.MouseButton1 or ch.UserInputType == Enum.UserInputType.Touch then
@@ -295,6 +287,7 @@ function e.new(bg)
 		end
 	end)
 
+	-- Resize
 	local cj, ck, cl
 	cc.InputBegan:Connect(function(cm)
 		if cm.UserInputType == Enum.UserInputType.MouseButton1 or cm.UserInputType == Enum.UserInputType.Touch then
@@ -338,28 +331,28 @@ function e:AddTab(cu)
 
 	local cw = q("TextButton", {
 		Parent = self.TabList,
-		Size = UDim2.new(1, -15, 0, 32),
+		Size = UDim2.new(1, -10, 0, 26),
 		BackgroundColor3 = f.ButtonBackground,
 		BackgroundTransparency = 1,
-		Text = "   " .. cu,
+		Text = "  " .. cu,
 		TextColor3 = f.TextSecondary,
-		Font = f.Font,
-		TextSize = 13,
+		Font = f.FontBody,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 	w(cw)
 
 	cw.MouseEnter:Connect(function()
 		if cw.BackgroundTransparency == 1 then
-			a:Create(cw, TweenInfo.new(0.15), {
+			a:Create(cw, TweenInfo.new(0.12), {
 				BackgroundTransparency = 0,
-				BackgroundColor3 = Color3.fromRGB(20, 32, 44),
+				BackgroundColor3 = Color3.fromRGB(35, 35, 45),
 			}):Play()
 		end
 	end)
 	cw.MouseLeave:Connect(function()
 		if cw.TextColor3 ~= f.TextPrimary then
-			a:Create(cw, TweenInfo.new(0.15), {
+			a:Create(cw, TweenInfo.new(0.12), {
 				BackgroundTransparency = 1,
 			}):Play()
 		end
@@ -372,50 +365,27 @@ function e:AddTab(cu)
 		Visible = cv == 1,
 	})
 
+	-- Single full-width scrolling column
 	local cy = q("ScrollingFrame", {
 		Parent = cx,
-		Size = UDim2.new(n, -4, 1, 0),
+		Size = UDim2.new(1, 0, 1, 0),
 		Position = UDim2.new(0, 0, 0, 0),
 		BackgroundTransparency = 1,
-		ScrollBarThickness = 4,
+		ScrollBarThickness = 3,
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 	})
-	q("UIListLayout", { Parent = cy, Padding = UDim.new(0, 8) })
+	q("UIListLayout", { Parent = cy, Padding = UDim.new(0, 6) })
 	q("UIPadding", {
 		Parent = cy,
 		PaddingTop = UDim.new(0, 8),
 		PaddingLeft = UDim.new(0, 8),
 		PaddingRight = UDim.new(0, 8),
-	})
-
-	q("Frame", {
-		Parent = cx,
-		Size = UDim2.new(0, 1, 1, -12),
-		Position = UDim2.new(n, 0, 0, 6),
-		BackgroundColor3 = f.Divider,
-		BorderSizePixel = 0,
-	})
-
-	local cz = q("ScrollingFrame", {
-		Parent = cx,
-		Size = UDim2.new(1 - n, -4, 1, 0),
-		Position = UDim2.new(n, 4, 0, 0),
-		BackgroundTransparency = 1,
-		ScrollBarThickness = 4,
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		CanvasSize = UDim2.new(0, 0, 0, 0),
-	})
-	q("UIListLayout", { Parent = cz, Padding = UDim.new(0, 8) })
-	q("UIPadding", {
-		Parent = cz,
-		PaddingTop = UDim.new(0, 8),
-		PaddingLeft = UDim.new(0, 8),
-		PaddingRight = UDim.new(0, 8),
+		PaddingBottom = UDim.new(0, 8),
 	})
 
 	table.insert(self.Tabs, { Button = cw, Page = cx })
-	table.insert(self.TabOffsets, 10 + (cv - 1) * 37)
+	table.insert(self.TabOffsets, 8 + (cv - 1) * 29)
 
 	cw.MouseButton1Click:Connect(function()
 		self:SelectTab(cv)
@@ -424,7 +394,7 @@ function e:AddTab(cu)
 	local da = setmetatable({
 		Page = cx,
 		Main = cy,
-		Side = cz,
+		Side = cy, -- same as Main now (no split)
 		Library = self,
 	}, ct)
 	return da
@@ -435,37 +405,37 @@ function e:SelectTab(db)
 	for dc, dd in ipairs(self.Tabs) do
 		dd.Page.Visible = (dc == db)
 		if dc == db then
-			a:Create(dd.Button, TweenInfo.new(0.15), {
+			a:Create(dd.Button, TweenInfo.new(0.12), {
 				BackgroundTransparency = 0,
 				BackgroundColor3 = f.AccentSelected,
 				TextColor3 = f.TextPrimary,
 			}):Play()
 		else
-			a:Create(dd.Button, TweenInfo.new(0.15), {
+			a:Create(dd.Button, TweenInfo.new(0.12), {
 				BackgroundTransparency = 1,
 				TextColor3 = f.TextSecondary,
 			}):Play()
 		end
 	end
-	a:Create(self.Indicator, TweenInfo.new(0.2), {
-		Position = UDim2.new(0, 5, 0, self.TabOffsets[db] or 10),
+	a:Create(self.Indicator, TweenInfo.new(0.15), {
+		Position = UDim2.new(0, 4, 0, self.TabOffsets[db] or 8),
 	}):Play()
 end
 
 function ct:AddButton(de, df, dg)
-	local dh = dg and self.Side or self.Main
+	local dh = self.Main
 	local di = q("TextButton", {
 		Parent = dh,
-		Size = UDim2.new(1, 0, 0, 36),
+		Size = UDim2.new(1, 0, 0, 30),
 		BackgroundColor3 = f.ButtonBackground,
-		Text = "   " .. de,
+		Text = "  " .. de,
 		TextColor3 = f.TextMuted,
 		Font = f.FontBody,
-		TextSize = 13,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 	w(di)
-	z(di, Color3.fromRGB(45, 62, 76), 1)
+	z(di, Color3.fromRGB(50, 50, 65), 1)
 
 	di.Activated:Connect(function()
 		if df then df() end
@@ -474,15 +444,15 @@ function ct:AddButton(de, df, dg)
 end
 
 function ct:AddToggle(dj, dk, dl)
-	local dm = dl and self.Side or self.Main
+	local dm = self.Main
 	local dn = q("TextButton", {
 		Parent = dm,
-		Size = UDim2.new(1, 0, 0, 36),
+		Size = UDim2.new(1, 0, 0, 28),
 		BackgroundColor3 = f.ButtonBackground,
-		Text = "   " .. dj,
+		Text = "  " .. dj,
 		TextColor3 = f.TextMuted,
 		Font = f.FontBody,
-		TextSize = 13,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 	w(dn)
@@ -490,10 +460,11 @@ function ct:AddToggle(dj, dk, dl)
 	local do_ = q("Frame", {
 		Parent = dn,
 		Size = UDim2.new(0, 16, 0, 16),
-		Position = UDim2.new(1, -28, 0.5, -8),
+		Position = UDim2.new(1, -26, 0.5, -8),
 		BackgroundColor3 = f.InputBackground,
 	})
-	w(do_, 4)
+	w(do_, 3)
+	z(do_, Color3.fromRGB(55, 55, 70), 1)
 
 	local dp = q("TextLabel", {
 		Parent = do_,
@@ -502,60 +473,60 @@ function ct:AddToggle(dj, dk, dl)
 		Text = "",
 		TextColor3 = f.TextPrimary,
 		Font = f.Font,
-		TextSize = 12,
+		TextSize = 11,
 	})
 
 	local dq = false
 	dn.Activated:Connect(function()
 		dq = not dq
-		dp.Text = dq and "X" or ""
-		do_.BackgroundColor3 = dq and f.AccentFill or f.InputBackground
+		dp.Text = dq and "✓" or ""
+		do_.BackgroundColor3 = dq and Color3.fromRGB(70, 70, 95) or f.InputBackground
 		if dk then dk(dq) end
 	end)
 	return dn
 end
 
 function ct:AddSectionLabel(dr, ds)
-	local dt = ds and self.Side or self.Main
+	local dt = self.Main
 	local du = q("TextLabel", {
 		Parent = dt,
-		Size = UDim2.new(1, 0, 0, 22),
+		Size = UDim2.new(1, 0, 0, 20),
 		BackgroundTransparency = 1,
 		Text = dr,
-		TextColor3 = f.AccentFill,
+		TextColor3 = Color3.fromRGB(140, 140, 160),
 		Font = f.FontBody,
-		TextSize = 13,
+		TextSize = 11,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 	return du
 end
 
 function ct:AddTextbox(dv, dw, dx, dy)
-	local dz = dy and self.Side or self.Main
+	local dz = self.Main
 	local ea = q("Frame", {
 		Parent = dz,
-		Size = UDim2.new(1, 0, 0, 36),
+		Size = UDim2.new(1, 0, 0, 30),
 		BackgroundColor3 = f.ButtonBackground,
 	})
 	w(ea)
-	z(ea, Color3.fromRGB(45, 62, 76), 1)
+	z(ea, Color3.fromRGB(50, 50, 65), 1)
 
 	q("TextLabel", {
 		Parent = ea,
-		Size = UDim2.new(0.45, 0, 1, 0),
-		Position = UDim2.new(0, 10, 0, 0),
+		Size = UDim2.new(0.4, 0, 1, 0),
+		Position = UDim2.new(0, 8, 0, 0),
 		BackgroundTransparency = 1,
 		Text = dv,
 		TextColor3 = f.TextMuted,
 		Font = f.FontBody,
-		TextSize = 13,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 
 	local eb = q("TextBox", {
 		Parent = ea,
-		Size = UDim2.new(0.5, -14, 0, 24),
-		Position = UDim2.new(0.5, 0, 0.5, -12),
+		Size = UDim2.new(0.55, -10, 0, 22),
+		Position = UDim2.new(0.42, 0, 0.5, -11),
 		BackgroundColor3 = f.InputBackground,
 		TextColor3 = f.TextPrimary,
 		PlaceholderText = dw or "",
@@ -565,58 +536,57 @@ function ct:AddTextbox(dv, dw, dx, dy)
 		Text = "",
 		ClearTextOnFocus = false,
 	})
-	w(eb, 5)
+	w(eb, 4)
 
 	eb.FocusLost:Connect(function(ec)
 		if dx then dx(eb.Text, ec) end
 	end)
-
 	return eb
 end
 
 function ct:AddSlider(ed, ee, ef, eg, eh, ei)
-	local ej = ei and self.Side or self.Main
+	local ej = self.Main
 	ee = ee or 0
 	ef = ef or 100
 	eg = math.clamp(eg or ee, ee, ef)
 
 	local ek = q("Frame", {
 		Parent = ej,
-		Size = UDim2.new(1, 0, 0, 52),
+		Size = UDim2.new(1, 0, 0, 46),
 		BackgroundColor3 = f.ButtonBackground,
 	})
 	w(ek)
-	z(ek, Color3.fromRGB(45, 62, 76), 1)
+	z(ek, Color3.fromRGB(50, 50, 65), 1)
 
 	q("TextLabel", {
 		Parent = ek,
-		Size = UDim2.new(1, -70, 0, 20),
-		Position = UDim2.new(0, 10, 0, 4),
+		Size = UDim2.new(1, -60, 0, 18),
+		Position = UDim2.new(0, 8, 0, 4),
 		BackgroundTransparency = 1,
 		Text = ed,
 		TextColor3 = f.TextMuted,
 		Font = f.FontBody,
-		TextSize = 13,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 
 	local el = q("TextBox", {
 		Parent = ek,
-		Size = UDim2.new(0, 50, 0, 20),
-		Position = UDim2.new(1, -60, 0, 4),
+		Size = UDim2.new(0, 46, 0, 18),
+		Position = UDim2.new(1, -54, 0, 4),
 		BackgroundColor3 = f.InputBackground,
 		TextColor3 = f.TextPrimary,
 		Font = f.FontBody,
-		TextSize = 12,
+		TextSize = 11,
 		Text = tostring(eg),
 		ClearTextOnFocus = false,
 	})
-	w(el, 5)
+	w(el, 4)
 
 	local em = q("Frame", {
 		Parent = ek,
-		Size = UDim2.new(1, -20, 0, 6),
-		Position = UDim2.new(0, 10, 1, -14),
+		Size = UDim2.new(1, -16, 0, 5),
+		Position = UDim2.new(0, 8, 1, -12),
 		BackgroundColor3 = f.InputBackground,
 	})
 	w(em, 3)
@@ -624,18 +594,18 @@ function ct:AddSlider(ed, ee, ef, eg, eh, ei)
 	local en = q("Frame", {
 		Parent = em,
 		Size = UDim2.new(0, 0, 1, 0),
-		BackgroundColor3 = f.AccentFill,
+		BackgroundColor3 = Color3.fromRGB(100, 100, 130),
 	})
 	w(en, 3)
 
 	local eo = q("Frame", {
 		Parent = em,
-		Size = UDim2.new(0, 12, 0, 12),
-		Position = UDim2.new(0, -6, 0.5, -6),
+		Size = UDim2.new(0, 10, 0, 10),
+		Position = UDim2.new(0, -5, 0.5, -5),
 		BackgroundColor3 = f.TextPrimary,
 		ZIndex = 5,
 	})
-	w(eo, 6)
+	w(eo, 5)
 
 	local ep = eg
 	local function eq(er, es)
@@ -643,7 +613,7 @@ function ct:AddSlider(ed, ee, ef, eg, eh, ei)
 		ep = er
 		local et = (ef - ee) == 0 and 0 or (er - ee) / (ef - ee)
 		en.Size = UDim2.new(et, 0, 1, 0)
-		eo.Position = UDim2.new(et, -6, 0.5, -6)
+		eo.Position = UDim2.new(et, -5, 0.5, -5)
 		if not es then
 			el.Text = tostring(math.floor(er * 100) / 100)
 		end
@@ -693,13 +663,12 @@ function ct:AddSlider(ed, ee, ef, eg, eh, ei)
 end
 
 function ct:AddDropdown(fd, fe, ff, fg)
-	if ff == nil then ff = true end
-	local fh = ff and self.Side or self.Main
+	local fh = self.Main
 	local fi = self.Library
 
-	local fj = 24
+	local fj = 22
 	local fk = 2
-	local fl = 150
+	local fl = 140
 
 	local fm = q("Frame", {
 		Parent = fh,
@@ -708,7 +677,7 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		AutomaticSize = Enum.AutomaticSize.Y,
 		ZIndex = 2,
 	})
-	q("UIListLayout", { Parent = fm, Padding = UDim.new(0, 4) })
+	q("UIListLayout", { Parent = fm, Padding = UDim.new(0, 3) })
 
 	local fn = q("TextButton", {
 		Parent = fm,
@@ -719,23 +688,24 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		ZIndex = 2,
 	})
 	w(fn)
+	z(fn, Color3.fromRGB(50, 50, 65), 1)
 
 	local fo = q("TextLabel", {
 		Parent = fn,
 		Size = UDim2.new(1, -10, 1, 0),
-		Position = UDim2.new(0, 10, 0, 0),
+		Position = UDim2.new(0, 8, 0, 0),
 		BackgroundTransparency = 1,
 		Text = fd .. "  " .. o,
-		TextColor3 = f.AccentFill,
+		TextColor3 = f.TextMuted,
 		Font = f.FontBody,
-		TextSize = 13,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 2,
 	})
 
 	local fp = q("Frame", {
 		Parent = fm,
-		Size = UDim2.new(1, 0, 0, 20),
+		Size = UDim2.new(1, 0, 0, 18),
 		BackgroundTransparency = 1,
 		ZIndex = 2,
 	})
@@ -743,10 +713,10 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		Parent = fp,
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = f.InputBackground,
-		Text = "Close  \195\151",
+		Text = "Close ×",
 		TextColor3 = f.TextSecondary,
 		Font = f.FontBody,
-		TextSize = 12,
+		TextSize = 11,
 		ZIndex = 2,
 	})
 	w(fq, 4)
@@ -756,20 +726,20 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		Size = UDim2.new(1, 0, 0, 0),
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 4,
+		ScrollBarThickness = 3,
 		BackgroundColor3 = f.InputBackground,
 		ClipsDescendants = true,
 		Visible = true,
 		ZIndex = 2,
 	})
-	w(fr, 6)
+	w(fr, 5)
 	q("UIListLayout", { Parent = fr, Padding = UDim.new(0, fk) })
 	q("UIPadding", {
 		Parent = fr,
-		PaddingTop = UDim.new(0, 4),
-		PaddingBottom = UDim.new(0, 4),
-		PaddingLeft = UDim.new(0, 4),
-		PaddingRight = UDim.new(0, 4),
+		PaddingTop = UDim.new(0, 3),
+		PaddingBottom = UDim.new(0, 3),
+		PaddingLeft = UDim.new(0, 3),
+		PaddingRight = UDim.new(0, 3),
 	})
 
 	local fs = { Frame = fm, Content = fr }
@@ -782,7 +752,7 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		local fv = #fs._options
 		local fw = 0
 		if fv > 0 then
-			fw = math.min(fv * fj + (fv - 1) * fk + 8, fl)
+			fw = math.min(fv * fj + (fv - 1) * fk + 6, fl)
 		end
 		fr.Size = UDim2.new(1, 0, 0, fw)
 	end
@@ -807,7 +777,6 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		fp.Visible = ga
 		fo.Text = fd .. "  " .. (ga and o or p)
 		fx(ga and 10 or 2)
-
 		if ga and fi then
 			for _, gb in ipairs(fi.Dropdowns) do
 				if gb ~= fs and gb._IsExpanded and gb._IsExpanded() then
@@ -824,9 +793,9 @@ function ct:AddDropdown(fd, fe, ff, fg)
 			Size = UDim2.new(1, 0, 0, fj),
 			BackgroundTransparency = 1,
 			Text = "  " .. gc,
-			TextColor3 = Color3.fromRGB(198, 214, 224),
+			TextColor3 = Color3.fromRGB(190, 190, 205),
 			Font = Enum.Font.Gotham,
-			TextSize = 12,
+			TextSize = 11,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			ZIndex = ft and 10 or 2,
 			AutoButtonColor = false,
@@ -839,10 +808,10 @@ function ct:AddDropdown(fd, fe, ff, fg)
 				ge.BackgroundTransparency = 0
 				ge.BackgroundColor3 = f.AccentSelected
 				ge.TextColor3 = f.TextPrimary
-				ge.Text = (fs.MultiSelect and "\226\156\147 " or "  ") .. gc
+				ge.Text = (fs.MultiSelect and "✓ " or "  ") .. gc
 			else
 				ge.BackgroundTransparency = 1
-				ge.TextColor3 = Color3.fromRGB(198, 214, 224)
+				ge.TextColor3 = Color3.fromRGB(190, 190, 205)
 				ge.Text = "  " .. gc
 			end
 		end
@@ -855,7 +824,7 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		ge.MouseEnter:Connect(function()
 			if not gf then
 				ge.BackgroundTransparency = 0
-				ge.BackgroundColor3 = Color3.fromRGB(20, 32, 44)
+				ge.BackgroundColor3 = Color3.fromRGB(40, 40, 52)
 			end
 		end)
 		ge.MouseLeave:Connect(function()
@@ -932,8 +901,7 @@ function ct:AddDropdown(fd, fe, ff, fg)
 		table.insert(fi.Dropdowns, fs)
 	end
 
-	fs:SetOpen(true)
-
+	fs:SetOpen(false) -- start closed like the video style
 	return fs
 end
 
