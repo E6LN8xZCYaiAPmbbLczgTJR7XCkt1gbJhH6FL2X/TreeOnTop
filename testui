@@ -66,7 +66,7 @@ function library.new(config)
 	self.selectedIndex = 1
 	self.dropdowns = {}
 	local screenGui = create("ScreenGui", {
-		Name = config.Name or "ZenithUILib",
+		Name = config.Name or "TreeUILib",
 		ResetOnSpawn = false,
 		Parent = CoreGui,
 	})
@@ -101,7 +101,7 @@ function library.new(config)
 		Parent = toggleBtn,
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
-		Text = config.ToggleLabel or "M",
+		Text = config.ToggleLabel or "T",
 		Font = theme.font,
 		TextSize = 26,
 		TextColor3 = theme.textPrimary,
@@ -152,7 +152,7 @@ function library.new(config)
 		Size = UDim2.new(1, -10, 1, 0),
 		Position = UDim2.new(0, 8, 0, 0),
 		BackgroundTransparency = 1,
-		Text = config.Title or "Zenith UI",
+		Text = config.Title or "Tree UI",
 		TextColor3 = theme.textPrimary,
 		Font = theme.font,
 		TextSize = 14,
@@ -504,7 +504,7 @@ function tab:AddToggle(text, callback, useSide)
 	local enabled = false
 	button.Activated:Connect(function()
 		enabled = not enabled
-		check.Text = enabled and "X" or ""
+		check.Text = enabled and "" or ""
 		box.BackgroundColor3 = enabled and theme.accentFill or theme.inputBackground
 		if callback then callback(enabled) end
 	end)
